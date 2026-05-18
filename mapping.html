@@ -5,98 +5,94 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Exclusion Zone Mapping</title>
 <style>
-*{margin:0;padding:0;box-sizing:border-box;font-family:"Courier New",monospace;}
-body{overflow:hidden;background:black;color:#00ff88;}
+
+*{ margin:0; padding:0; box-sizing:border-box; font-family:"Courier New",monospace; }
+body{ overflow:hidden; background:black; color:#00ff88; }
 
 .topbar{
-    position:fixed;top:0;left:0;width:100%;
-    padding:12px 20px;border-bottom:1px solid #00ff88;
-    background:rgba(0,0,0,0.9);z-index:1000;
+    position:fixed; top:0; left:0; width:100%;
+    padding:12px 20px; border-bottom:1px solid #00ff88;
+    background:rgba(0,0,0,0.9); z-index:1000;
 }
-.topbar h1{font-size:20px;}
+.topbar h1{ font-size:20px; }
 
 .map-container{
-    width:100vw;height:100vh;overflow:hidden;
-    position:relative;cursor:crosshair;
+    width:100vw; height:100vh; overflow:hidden;
+    position:relative; cursor:crosshair;
 }
-.map-container:active{cursor:grabbing;}
+.map-container:active{ cursor:grabbing; }
 
 #mapWorld{
-    position:absolute;top:0;left:0;
-    width:1127px;transform-origin:0 0;
+    position:absolute; top:0; left:0;
+    width:1158px; transform-origin:0 0;
 }
 
-#map{display:block;width:1127px;height:1289px;user-select:none;pointer-events:none;}
-
-#gridCanvas{
-    position:absolute;top:0;left:0;
-    pointer-events:none;z-index:5;
+#map{
+    display:block; width:1158px; height:1320px;
+    user-select:none; pointer-events:none;
 }
 
 .marker{
-    position:absolute;width:10px;height:10px;
-    border-radius:50%;margin-left:-5px;margin-top:-5px;
-    cursor:pointer;z-index:10;
+    position:absolute; width:10px; height:10px;
+    border-radius:50%; margin-left:-5px; margin-top:-5px;
+    cursor:pointer; z-index:10;
 }
 .label{
-    position:absolute;top:-18px;left:50%;
+    position:absolute; top:-18px; left:50%;
     transform:translateX(-50%);
-    font-size:12px;white-space:nowrap;
-    color:#00ff88;pointer-events:none;
+    font-size:12px; white-space:nowrap;
+    color:#00ff88; pointer-events:none;
 }
 
-.green{background:#00ff88;}
-.red{background:#ff3b3b;}
-.yellow{background:#ffd000;}
-.black{background:#111;border:1px solid #00ff88;}
-.brown{background:#8b5a2b;}
-.white{background:#fff;}
-
-.popup{
-    position:fixed;top:50%;left:50%;
-    transform:translate(-50%,-50%);
-    background:black;border:1px solid #00ff88;
-    padding:20px;width:320px;display:none;z-index:2000;
-}
-.popup img{width:100%;margin-top:10px;border:1px solid #00ff88;}
-.popup a{display:block;margin-top:10px;color:#6ed6ff;}
-.close{position:absolute;top:5px;right:10px;cursor:pointer;}
-
-.controls{
-    position:fixed;bottom:20px;right:20px;
-    display:flex;flex-direction:column;gap:10px;z-index:1000;
-}
-.controls button{
-    width:50px;height:50px;background:black;
-    border:1px solid #00ff88;color:#00ff88;
-    font-size:20px;cursor:pointer;
-}
-
-.scanlines{
-    position:fixed;inset:0;pointer-events:none;
-    background:repeating-linear-gradient(
-        to bottom,
-        rgba(255,255,255,0.03),
-        rgba(255,255,255,0.03) 1px,
-        transparent 1px,
-        transparent 3px
-    );
-}
+.green  { background:#00ff88; }
+.red    { background:#ff3b3b; }
+.yellow { background:#ffd000; }
+.black  { background:#111; border:1px solid #00ff88; }
+.brown  { background:#8b5a2b; }
+.white  { background:#fff; }
 
 #cursorTip{
-    display:none;
     position:fixed;
     pointer-events:none;
-    background:rgba(0,0,0,0.85);
+    background:black;
     border:1px solid #00ff88;
-    padding:4px 10px;
+    padding:5px 10px;
     font-size:12px;
     color:#00ff88;
     z-index:5000;
     white-space:nowrap;
-    line-height:1.8;
+    display:none;
 }
-#tipGrid{color:#ffd000;}
+
+.popup{
+    position:fixed; top:50%; left:50%;
+    transform:translate(-50%,-50%);
+    background:black; border:1px solid #00ff88;
+    padding:20px; width:320px; display:none; z-index:2000;
+}
+.popup img{ width:100%; margin-top:10px; border:1px solid #00ff88; }
+.popup a{ display:block; margin-top:10px; color:#6ed6ff; }
+.close{ position:absolute; top:5px; right:10px; cursor:pointer; }
+
+.controls{
+    position:fixed; bottom:20px; right:20px;
+    display:flex; flex-direction:column; gap:10px; z-index:1000;
+}
+.controls button{
+    width:50px; height:50px; background:black;
+    border:1px solid #00ff88; color:#00ff88;
+    font-size:20px; cursor:pointer;
+}
+
+.scanlines{
+    position:fixed; inset:0; pointer-events:none;
+    background:repeating-linear-gradient(
+        to bottom,
+        rgba(255,255,255,0.03), rgba(255,255,255,0.03) 1px,
+        transparent 1px, transparent 3px
+    );
+}
+
 </style>
 </head>
 <body>
@@ -109,8 +105,8 @@ body{overflow:hidden;background:black;color:#00ff88;}
 
 <div class="map-container" id="mapContainer">
     <div id="mapWorld">
-        <img src="https://operator.coolsquad.xyz/u/tFQL4R.png" id="map">
-        <canvas id="gridCanvas"></canvas>
+
+        <img src="https://operator.coolsquad.xyz/u/luBi56.png" id="map">
 
         <div class="marker green" style="top:1218px;left:496px;" onclick="openPopup('Placid Wakes FOB')">
             <div class="label">Placid Wakes FOB</div>
@@ -148,13 +144,11 @@ body{overflow:hidden;background:black;color:#00ff88;}
         <div class="marker white" style="top:680px;left:812px;" onclick="openPopup('Newtons Triangle')">
             <div class="label">Newtons Triangle</div>
         </div>
+
     </div>
 </div>
 
-<div id="cursorTip">
-    <div id="tipPx"></div>
-    <div id="tipGrid"></div>
-</div>
+<div id="cursorTip"></div>
 
 <div class="popup" id="popup">
     <div class="close" onclick="closePopup()">X</div>
@@ -169,58 +163,10 @@ body{overflow:hidden;background:black;color:#00ff88;}
 </div>
 
 <script>
+
 const world     = document.getElementById("mapWorld");
 const container = document.getElementById("mapContainer");
-const canvas    = document.getElementById("gridCanvas");
-const ctx       = canvas.getContext("2d");
 const tip       = document.getElementById("cursorTip");
-const tipPx     = document.getElementById("tipPx");
-const tipGrid   = document.getElementById("tipGrid");
-
-const MAP_W   = 1127;
-const MAP_H   = 1289;
-const COLS    = 21;
-const ROWS    = 24;
-const LETTERS = "ABCDEFGHIJKLMNOPQRSTU";
-const CELL_W  = MAP_W / COLS;
-const CELL_H  = MAP_H / ROWS;
-
-function drawGrid(){
-    canvas.width  = MAP_W;
-    canvas.height = MAP_H;
-    ctx.clearRect(0, 0, MAP_W, MAP_H);
-
-    ctx.strokeStyle = "rgba(0,255,136,0.15)";
-    ctx.lineWidth   = 0.5;
-    for(let c = 1; c < COLS; c++){
-        ctx.beginPath();
-        ctx.moveTo(c * CELL_W, 0);
-        ctx.lineTo(c * CELL_W, MAP_H);
-        ctx.stroke();
-    }
-    for(let r = 1; r < ROWS; r++){
-        ctx.beginPath();
-        ctx.moveTo(0, r * CELL_H);
-        ctx.lineTo(MAP_W, r * CELL_H);
-        ctx.stroke();
-    }
-
-    ctx.fillStyle    = "rgba(0,255,136,0.5)";
-    ctx.font         = "bold 10px 'Courier New',monospace";
-    ctx.textAlign    = "center";
-    ctx.textBaseline = "top";
-    for(let c = 0; c < COLS; c++){
-        ctx.fillText(LETTERS[c], c * CELL_W + CELL_W / 2, 3);
-    }
-
-    ctx.textAlign    = "left";
-    ctx.textBaseline = "middle";
-    for(let r = 0; r < ROWS; r++){
-        ctx.fillText(String(r + 1), 3, r * CELL_H + CELL_H / 2);
-    }
-}
-
-drawGrid();
 
 let scale = 1, x = 0, y = 0;
 let dragging = false, sx, sy;
@@ -233,48 +179,34 @@ container.addEventListener("mousedown", e => {
 window.addEventListener("mouseup",   () => dragging = false);
 window.addEventListener("mousemove", e => {
     if(dragging){ x = e.clientX - sx; y = e.clientY - sy; update(); }
-    moveTip(e);
+
+    const mx = Math.round((e.clientX - x) / scale);
+    const my = Math.round((e.clientY - y) / scale);
+    tip.textContent = "X:" + mx + "  Y:" + my;
+
+    const pad = 14;
+    let tx = e.clientX + pad;
+    let ty = e.clientY + pad;
+    if(tx + tip.offsetWidth  > window.innerWidth)  tx = e.clientX - tip.offsetWidth  - pad;
+    if(ty + tip.offsetHeight > window.innerHeight) ty = e.clientY - tip.offsetHeight - pad;
+    tip.style.left = tx + "px";
+    tip.style.top  = ty + "px";
 });
-
-function zoomAt(ns, cx, cy){
-    ns = Math.min(5, Math.max(0.2, +ns.toFixed(2)));
-    x  = cx - (cx - x) * (ns / scale);
-    y  = cy - (cy - y) * (ns / scale);
-    scale = ns;
-    update();
-}
-function zoomIn()  { zoomAt(scale + 0.1, window.innerWidth / 2, window.innerHeight / 2); }
-function zoomOut() { zoomAt(scale - 0.1, window.innerWidth / 2, window.innerHeight / 2); }
-function update()  { world.style.transform = `translate(${x}px,${y}px) scale(${scale})`; }
-
-window.addEventListener("wheel", e => {
-    e.preventDefault();
-    zoomAt(e.deltaY < 0 ? scale + 0.1 : scale - 0.1, e.clientX, e.clientY);
-}, { passive: false });
 
 container.addEventListener("mouseenter", () => tip.style.display = "block");
 container.addEventListener("mouseleave", () => tip.style.display = "none");
 
-function moveTip(e){
-    const mx = Math.round((e.clientX - x) / scale);
-    const my = Math.round((e.clientY - y) / scale);
+function zoomIn()  { scale = Math.min(5,   +(scale + 0.1).toFixed(2)); update(); }
+function zoomOut() { scale = Math.max(0.2, +(scale - 0.1).toFixed(2)); update(); }
+function update()  { world.style.transform = `translate(${x}px,${y}px) scale(${scale})`; }
 
-    const col    = Math.floor(mx / CELL_W);
-    const row    = Math.floor(my / CELL_H);
-    const letter = (col >= 0 && col < COLS) ? LETTERS[col] : "-";
-    const num    = (row >= 0 && row < ROWS) ? String(row + 1) : "-";
-
-    tipPx.textContent   = "X:" + mx + "  Y:" + my;
-    tipGrid.textContent = "GRID: " + letter + num;
-
-    const off = 16;
-    let tx = e.clientX + off;
-    let ty = e.clientY + off;
-    if(tx + tip.offsetWidth  > window.innerWidth)  tx = e.clientX - tip.offsetWidth  - off;
-    if(ty + tip.offsetHeight > window.innerHeight) ty = e.clientY - tip.offsetHeight - off;
-    tip.style.left = tx + "px";
-    tip.style.top  = ty + "px";
-}
+window.addEventListener("wheel", e => {
+    e.preventDefault();
+    scale = e.deltaY < 0
+        ? Math.min(5,   +(scale + 0.1).toFixed(2))
+        : Math.max(0.2, +(scale - 0.1).toFixed(2));
+    update();
+}, { passive:false });
 
 function openPopup(title, img, link){
     document.getElementById("popup").style.display = "block";
@@ -289,6 +221,7 @@ function openPopup(title, img, link){
 function closePopup(){ document.getElementById("popup").style.display = "none"; }
 
 update();
+
 </script>
 </body>
 </html>
