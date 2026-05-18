@@ -12,12 +12,12 @@
     margin:0;
     padding:0;
     box-sizing:border-box;
+    font-family:"Courier New", monospace;
 }
 
 body{
     overflow:hidden;
     background:black;
-    font-family:"Courier New", monospace;
     color:#00ff88;
 }
 
@@ -29,61 +29,19 @@ body{
     left:0;
     width:100%;
 
-    padding:15px 20px;
-
+    padding:12px 18px;
     border-bottom:1px solid #00ff88;
-
     background:rgba(0,0,0,0.9);
-
-    z-index:5000;
+    z-index:1000;
 }
 
-.topbar h1{
-    font-size:24px;
-    margin-bottom:5px;
-}
-
-.topbar p{
-    color:#7dffb2;
-    font-size:14px;
-}
-
-/* RETURN BUTTON */
-
-.back{
-    position:fixed;
-
-    top:20px;
-    right:20px;
-
-    color:#00ff88;
-
-    text-decoration:none;
-
-    border:1px solid #00ff88;
-
-    padding:10px 15px;
-
-    z-index:6000;
-
-    transition:0.2s;
-}
-
-.back:hover{
-    background:#00ff88;
-    color:black;
-}
-
-/* MAP AREA */
+/* MAP WRAPPER */
 
 .map-container{
     width:100vw;
     height:100vh;
-
     overflow:hidden;
-
     position:relative;
-
     cursor:grab;
 }
 
@@ -91,25 +49,14 @@ body{
     cursor:grabbing;
 }
 
-/* MAP WRAPPER */
-
-#mapWrapper{
-    position:absolute;
-
-    top:50%;
-    left:50%;
-
-    transform:translate(-50%, -50%) scale(1);
-
-    transform-origin:center center;
-}
-
 /* MAP */
 
 #map{
+    position:absolute;
+    top:50%;
+    left:50%;
+    transform-origin:center;
     width:1200px;
-    display:block;
-
     user-select:none;
     -webkit-user-drag:none;
 }
@@ -118,137 +65,78 @@ body{
 
 .marker{
     position:absolute;
-
-    width:14px;
-    height:14px;
-
+    width:10px;
+    height:10px;
     border-radius:50%;
-
     transform:translate(-50%, -50%);
-
     cursor:pointer;
-
-    border:1px solid rgba(255,255,255,0.3);
+    z-index:10;
 }
 
-/* LABELS */
-
-.label{
+.marker::after{
+    content: attr(data-title);
     position:absolute;
-
-    transform:translate(-50%, -100%);
-
-    margin-top:-10px;
-
-    font-size:12px;
-
+    top:-18px;
+    left:50%;
+    transform:translateX(-50%);
+    font-size:10px;
     white-space:nowrap;
-
-    text-shadow:0 0 5px black;
-
-    pointer-events:none;
+    color:#00ff88;
 }
 
 /* COLORS */
 
 .green{ background:#00ff88; }
-.red{ background:#ff3333; }
-.yellow{ background:#ffee00; }
-.black{ background:#111; }
+.red{ background:#ff3b3b; }
+.yellow{ background:#ffd000; }
+.black{ background:#222; border:1px solid #00ff88; }
 .brown{ background:#8b5a2b; }
+.white{ background:#ffffff; }
 
 /* POPUP */
 
 .popup{
     position:fixed;
-
     top:50%;
     left:50%;
-
-    transform:translate(-50%, -50%);
-
-    width:420px;
-
-    max-width:90vw;
-
+    transform:translate(-50%,-50%);
     background:black;
-
     border:1px solid #00ff88;
-
     padding:20px;
-
-    z-index:9999;
-
     display:none;
-}
-
-.popup h2{
-    margin-bottom:15px;
+    max-width:320px;
+    z-index:2000;
 }
 
 .popup img{
     width:100%;
-    border:1px solid #00ff88;
     margin-top:10px;
+    border:1px solid #00ff88;
 }
 
 .popup a{
+    display:block;
+    margin-top:10px;
     color:#6ed6ff;
-}
-
-.close-btn{
-    margin-top:20px;
-
-    padding:10px 15px;
-
-    border:1px solid #00ff88;
-
-    background:black;
-
-    color:#00ff88;
-
-    cursor:pointer;
-}
-
-/* TRIANGLE */
-
-#triangle{
-    position:absolute;
-
-    pointer-events:auto;
-
-    cursor:pointer;
 }
 
 /* CONTROLS */
 
 .controls{
     position:fixed;
-
     bottom:20px;
     right:20px;
-
-    display:flex;
-    flex-direction:column;
-
-    gap:10px;
-
-    z-index:5000;
+    z-index:1000;
 }
 
 .controls button{
-    width:50px;
-    height:50px;
-
-    background:black;
-
-    color:#00ff88;
-
+    width:45px;
+    height:45px;
+    margin:5px;
     border:1px solid #00ff88;
-
-    font-size:24px;
-
-    cursor:pointer;
+    background:black;
+    color:#00ff88;
+    font-size:20px;
 }
 
 /* SCANLINES */
@@ -256,19 +144,14 @@ body{
 .scanlines{
     position:fixed;
     inset:0;
-
     pointer-events:none;
-
-    background:
-    repeating-linear-gradient(
+    background:repeating-linear-gradient(
         to bottom,
         rgba(255,255,255,0.03),
         rgba(255,255,255,0.03) 1px,
         transparent 1px,
         transparent 3px
     );
-
-    z-index:10000;
 }
 
 </style>
@@ -278,299 +161,143 @@ body{
 
 <div class="scanlines"></div>
 
-<a href="index.html" class="back">
-RETURN
-</a>
-
 <div class="topbar">
-
-    <h1>EXCLUSION ZONE MAPPING</h1>
-
-    <p>
-        Interactive terrain and anomaly mapping interface.
-    </p>
-
+    EXCLUSION ZONE MAPPING
 </div>
 
-<div class="map-container" id="mapContainer">
+<div class="map-container" id="container">
 
-    <div id="mapWrapper">
+    <img id="map" src="https://operator.coolsquad.xyz/u/luBi56.png">
 
-        <img
-            src="https://operator.coolsquad.xyz/u/luBi56.png"
-            id="map"
-            draggable="false"
-        >
+    <!-- MARKERS -->
 
-        <!-- SVG TRIANGLE -->
+    <div class="marker green" style="left:496px; top:1218px;" data-title="Placid Wakes FOB"></div>
 
-        <svg
-            id="triangle"
-            width="1200"
-            height="1200"
-        >
+    <div class="marker red" style="left:594px; top:1195px;" data-title="Red Box"
+        data-img="https://operator.coolsquad.xyz/u/RIghwK.png"
+        data-link="artifact-001.html"></div>
 
-            <polygon
-                points="739,686 760,643 812,680"
-                fill="rgba(255,255,255,0.08)"
-                stroke="rgba(255,255,255,0.2)"
-                stroke-width="2"
-                onclick="showPopup('Newtons Triangle')"
-            />
+    <div class="marker red" style="left:550px; top:373px;" data-title="The Monolith"
+        data-img="https://operator.coolsquad.xyz/u/mH30lg.png"
+        data-link="artifact-003.html"></div>
 
-        </svg>
+    <div class="marker yellow" style="left:690px; top:710px;" data-title="The Church"></div>
 
-    </div>
+    <div class="marker black" style="left:750px; top:541px;" data-title="Black Prism"></div>
 
-</div>
+    <div class="marker brown" style="left:856px; top:573px;" data-title="AP Roots"></div>
+    <div class="marker brown" style="left:758px; top:739px;" data-title="AP Roots"></div>
+    <div class="marker brown" style="left:279px; top:627px;" data-title="AP Roots"></div>
+    <div class="marker brown" style="left:831px; top:682px;" data-title="AP Roots"></div>
 
-<div class="controls">
-
-    <button id="zoomIn">+</button>
-    <button id="zoomOut">−</button>
+    <div class="marker white" style="left:739px; top:686px;" data-title="Newtons Triangle"></div>
+    <div class="marker white" style="left:760px; top:643px;" data-title="Newtons Triangle"></div>
+    <div class="marker white" style="left:812px; top:680px;" data-title="Newtons Triangle"></div>
 
 </div>
 
 <!-- POPUP -->
 
 <div class="popup" id="popup">
+    <div id="popupTitle"></div>
+    <img id="popupImg" style="display:none;">
+    <a id="popupLink" target="_blank"></a>
+</div>
 
-    <div id="popupContent"></div>
-
-    <button class="close-btn" onclick="closePopup()">
-        CLOSE
-    </button>
-
+<div class="controls">
+    <button onclick="zoomIn()">+</button>
+    <button onclick="zoomOut()">-</button>
 </div>
 
 <script>
 
-/* MAP CONTROL */
-
-const mapWrapper = document.getElementById("mapWrapper");
-const container = document.getElementById("mapContainer");
+const map = document.getElementById("map");
+const container = document.getElementById("container");
 
 let scale = 1;
-let posX = 0;
-let posY = 0;
+let x = 0;
+let y = 0;
+let dragging = false;
+let sx, sy;
 
-let isDragging = false;
+/* TRANSFORM */
 
-let startX;
-let startY;
+function update(){
+    map.style.transform =
+        `translate(calc(-50% + ${x}px), calc(-50% + ${y}px)) scale(${scale})`;
 
-function updateMap(){
-
-    mapWrapper.style.transform =
-        `translate(calc(-50% + ${posX}px), calc(-50% + ${posY}px)) scale(${scale})`;
+    document.querySelectorAll(".marker").forEach(m => {
+        m.style.transform = `translate(-50%, -50%) scale(${1/scale})`;
+    });
 }
 
 /* ZOOM */
 
-document.getElementById("zoomIn").onclick = () => {
-
-    scale += 0.1;
-    updateMap();
-};
-
-document.getElementById("zoomOut").onclick = () => {
-
-    scale -= 0.1;
-
-    if(scale < 0.2){
-        scale = 0.2;
-    }
-
-    updateMap();
-};
+function zoomIn(){ scale += 0.1; update(); }
+function zoomOut(){ scale = Math.max(0.2, scale - 0.1); update(); }
 
 /* DRAG */
 
-container.addEventListener("mousedown", (e) => {
-
-    isDragging = true;
-
-    startX = e.clientX - posX;
-    startY = e.clientY - posY;
+container.addEventListener("mousedown",(e)=>{
+    dragging = true;
+    sx = e.clientX - x;
+    sy = e.clientY - y;
 });
 
-window.addEventListener("mouseup", () => {
+window.addEventListener("mouseup",()=>dragging=false);
 
-    isDragging = false;
+window.addEventListener("mousemove",(e)=>{
+    if(!dragging) return;
+    x = e.clientX - sx;
+    y = e.clientY - sy;
+    update();
 });
 
-window.addEventListener("mousemove", (e) => {
+/* WHEEL ZOOM */
 
-    if(!isDragging) return;
-
-    posX = e.clientX - startX;
-    posY = e.clientY - startY;
-
-    updateMap();
-});
-
-/* SCROLL ZOOM */
-
-window.addEventListener("wheel", (e) => {
-
+window.addEventListener("wheel",(e)=>{
     e.preventDefault();
-
-    if(e.deltaY < 0){
-
-        scale += 0.1;
-
-    } else {
-
-        scale -= 0.1;
-
-        if(scale < 0.2){
-            scale = 0.2;
-        }
-    }
-
-    updateMap();
-
-}, { passive:false });
+    scale += e.deltaY < 0 ? 0.1 : -0.1;
+    scale = Math.max(0.2, scale);
+    update();
+},{passive:false});
 
 /* POPUPS */
 
-function showPopup(title, image=null, link=null){
+const popup = document.getElementById("popup");
+const title = document.getElementById("popupTitle");
+const img = document.getElementById("popupImg");
+const link = document.getElementById("popupLink");
 
-    let html = `<h2>${title}</h2>`;
+document.querySelectorAll(".marker").forEach(m=>{
+    m.addEventListener("click",()=>{
 
-    if(image){
+        title.innerText = m.dataset.title;
 
-        html += `
-        <img src="${image}">
-        `;
-    }
+        if(m.dataset.img){
+            img.src = m.dataset.img;
+            img.style.display = "block";
+        } else {
+            img.style.display = "none";
+        }
 
-    if(link){
+        if(m.dataset.link){
+            link.href = m.dataset.link;
+            link.innerText = "Open File";
+        } else {
+            link.removeAttribute("href");
+            link.innerText = "";
+        }
 
-        html += `
-        <br><br>
-        <a href="${link}">
-            Open Artifact File
-        </a>
-        `;
-    }
-
-    document.getElementById("popupContent").innerHTML = html;
-
-    document.getElementById("popup").style.display = "block";
-}
-
-function closePopup(){
-
-    document.getElementById("popup").style.display = "none";
-}
-
-/* MARKERS */
-
-const markers = [
-
-{
-    x:496,
-    y:1218,
-    color:"green",
-    title:"Placid Wakes FOB"
-},
-
-{
-    x:594,
-    y:1195,
-    color:"red",
-    title:"Red Box",
-    image:"https://operator.coolsquad.xyz/u/RIghwK.png",
-    link:"artifact-001.html"
-},
-
-{
-    x:550,
-    y:373,
-    color:"red",
-    title:"The Monolith",
-    image:"https://operator.coolsquad.xyz/u/mH30lg.png",
-    link:"artifact-003.html"
-},
-
-{
-    x:690,
-    y:710,
-    color:"yellow",
-    title:"The Church"
-},
-
-{
-    x:750,
-    y:541,
-    color:"black",
-    title:"Black Prism"
-},
-
-{
-    x:856,
-    y:573,
-    color:"brown",
-    title:"AP Roots"
-},
-
-{
-    x:758,
-    y:739,
-    color:"brown",
-    title:"AP Roots"
-},
-
-{
-    x:279,
-    y:627,
-    color:"brown",
-    title:"AP Roots"
-},
-
-{
-    x:831,
-    y:682,
-    color:"brown",
-    title:"AP Roots"
-}
-
-];
-
-markers.forEach(marker => {
-
-    const dot = document.createElement("div");
-
-    dot.className = `marker ${marker.color}`;
-
-    dot.style.left = marker.x + "px";
-    dot.style.top = marker.y + "px";
-
-    dot.onclick = () => {
-
-        showPopup(
-            marker.title,
-            marker.image,
-            marker.link
-        );
-    };
-
-    const label = document.createElement("div");
-
-    label.className = "label";
-
-    label.style.left = marker.x + "px";
-    label.style.top = (marker.y - 10) + "px";
-
-    label.innerText = marker.title;
-
-    mapWrapper.appendChild(dot);
-    mapWrapper.appendChild(label);
-
+        popup.style.display = "block";
+    });
 });
 
-updateMap();
+popup.addEventListener("click",()=>{
+    popup.style.display = "none";
+});
+
+update();
 
 </script>
 
