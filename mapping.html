@@ -12,12 +12,12 @@
     margin:0;
     padding:0;
     box-sizing:border-box;
-    font-family:"Courier New", monospace;
 }
 
 body{
     overflow:hidden;
     background:black;
+    font-family:"Courier New", monospace;
     color:#00ff88;
 }
 
@@ -29,13 +29,25 @@ body{
     left:0;
     width:100%;
 
-    padding:12px 18px;
+    padding:15px 20px;
+
     border-bottom:1px solid #00ff88;
+
     background:rgba(0,0,0,0.9);
+
     z-index:1000;
 }
 
-/* MAP WRAPPER */
+.topbar h1{
+    font-size:22px;
+}
+
+.topbar p{
+    font-size:13px;
+    color:#7dffb2;
+}
+
+/* MAP */
 
 .map-container{
     width:100vw;
@@ -49,16 +61,15 @@ body{
     cursor:grabbing;
 }
 
-/* MAP */
-
 #map{
     position:absolute;
     top:50%;
     left:50%;
+    transform:translate(-50%, -50%) scale(1);
     transform-origin:center;
-    width:1200px;
     user-select:none;
     -webkit-user-drag:none;
+    width:1200px;
 }
 
 /* MARKERS */
@@ -68,30 +79,29 @@ body{
     width:10px;
     height:10px;
     border-radius:50%;
-    transform:translate(-50%, -50%);
     cursor:pointer;
     z-index:10;
+    transform:translate(-50%, -50%);
 }
 
-.marker::after{
-    content: attr(data-title);
+.marker.green{ background:#00ff88; }
+.marker.red{ background:#ff3b3b; }
+.marker.yellow{ background:#ffd000; }
+.marker.black{ background:#111; border:1px solid #00ff88; }
+.marker.brown{ background:#8b5a2b; }
+.marker.white{ background:#ffffff; }
+
+/* LABEL ABOVE DOT */
+
+.label{
     position:absolute;
-    top:-18px;
+    bottom:14px;
     left:50%;
     transform:translateX(-50%);
-    font-size:10px;
+    font-size:11px;
     white-space:nowrap;
     color:#00ff88;
 }
-
-/* COLORS */
-
-.green{ background:#00ff88; }
-.red{ background:#ff3b3b; }
-.yellow{ background:#ffd000; }
-.black{ background:#222; border:1px solid #00ff88; }
-.brown{ background:#8b5a2b; }
-.white{ background:#ffffff; }
 
 /* POPUP */
 
@@ -99,12 +109,15 @@ body{
     position:fixed;
     top:50%;
     left:50%;
-    transform:translate(-50%,-50%);
+    transform:translate(-50%, -50%);
+    width:320px;
+
     background:black;
     border:1px solid #00ff88;
-    padding:20px;
+
+    padding:15px;
+
     display:none;
-    max-width:320px;
     z-index:2000;
 }
 
@@ -115,9 +128,21 @@ body{
 }
 
 .popup a{
+    color:#6ed6ff;
     display:block;
     margin-top:10px;
-    color:#6ed6ff;
+    text-decoration:none;
+}
+
+.popup a:hover{
+    text-decoration:underline;
+}
+
+.close{
+    position:absolute;
+    top:5px;
+    right:8px;
+    cursor:pointer;
 }
 
 /* CONTROLS */
@@ -126,17 +151,38 @@ body{
     position:fixed;
     bottom:20px;
     right:20px;
+    display:flex;
+    flex-direction:column;
+    gap:10px;
     z-index:1000;
 }
 
 .controls button{
-    width:45px;
-    height:45px;
-    margin:5px;
+    width:50px;
+    height:50px;
     border:1px solid #00ff88;
     background:black;
     color:#00ff88;
-    font-size:20px;
+    font-size:22px;
+    cursor:pointer;
+}
+
+.controls button:hover{
+    background:#00ff88;
+    color:black;
+}
+
+/* BACK */
+
+.back{
+    position:fixed;
+    top:20px;
+    right:20px;
+    border:1px solid #00ff88;
+    padding:8px 12px;
+    color:#00ff88;
+    text-decoration:none;
+    z-index:1000;
 }
 
 /* SCANLINES */
@@ -145,13 +191,15 @@ body{
     position:fixed;
     inset:0;
     pointer-events:none;
-    background:repeating-linear-gradient(
-        to bottom,
-        rgba(255,255,255,0.03),
-        rgba(255,255,255,0.03) 1px,
-        transparent 1px,
-        transparent 3px
-    );
+    background:
+        repeating-linear-gradient(
+            to bottom,
+            rgba(255,255,255,0.03),
+            rgba(255,255,255,0.03) 1px,
+            transparent 1px,
+            transparent 3px
+        );
+    z-index:3000;
 }
 
 </style>
@@ -161,141 +209,163 @@ body{
 
 <div class="scanlines"></div>
 
+<a class="back" href="index.html">RETURN</a>
+
 <div class="topbar">
-    EXCLUSION ZONE MAPPING
+    <h1>EXCLUSION ZONE MAPPING</h1>
+    <p>Interactive anomaly grid interface</p>
 </div>
 
-<div class="map-container" id="container">
-
+<div class="map-container" id="mapContainer">
     <img id="map" src="https://operator.coolsquad.xyz/u/luBi56.png">
-
-    <!-- MARKERS -->
-
-    <div class="marker green" style="left:496px; top:1218px;" data-title="Placid Wakes FOB"></div>
-
-    <div class="marker red" style="left:594px; top:1195px;" data-title="Red Box"
-        data-img="https://operator.coolsquad.xyz/u/RIghwK.png"
-        data-link="artifact-001.html"></div>
-
-    <div class="marker red" style="left:550px; top:373px;" data-title="The Monolith"
-        data-img="https://operator.coolsquad.xyz/u/mH30lg.png"
-        data-link="artifact-003.html"></div>
-
-    <div class="marker yellow" style="left:690px; top:710px;" data-title="The Church"></div>
-
-    <div class="marker black" style="left:750px; top:541px;" data-title="Black Prism"></div>
-
-    <div class="marker brown" style="left:856px; top:573px;" data-title="AP Roots"></div>
-    <div class="marker brown" style="left:758px; top:739px;" data-title="AP Roots"></div>
-    <div class="marker brown" style="left:279px; top:627px;" data-title="AP Roots"></div>
-    <div class="marker brown" style="left:831px; top:682px;" data-title="AP Roots"></div>
-
-    <div class="marker white" style="left:739px; top:686px;" data-title="Newtons Triangle"></div>
-    <div class="marker white" style="left:760px; top:643px;" data-title="Newtons Triangle"></div>
-    <div class="marker white" style="left:812px; top:680px;" data-title="Newtons Triangle"></div>
-
-</div>
-
-<!-- POPUP -->
-
-<div class="popup" id="popup">
-    <div id="popupTitle"></div>
-    <img id="popupImg" style="display:none;">
-    <a id="popupLink" target="_blank"></a>
 </div>
 
 <div class="controls">
-    <button onclick="zoomIn()">+</button>
-    <button onclick="zoomOut()">-</button>
+    <button id="zoomIn">+</button>
+    <button id="zoomOut">-</button>
+</div>
+
+<!-- POPUP -->
+<div class="popup" id="popup">
+    <div class="close" onclick="closePopup()">X</div>
+    <div id="popupContent"></div>
 </div>
 
 <script>
 
 const map = document.getElementById("map");
-const container = document.getElementById("container");
+const container = document.getElementById("mapContainer");
+const popup = document.getElementById("popup");
+const popupContent = document.getElementById("popupContent");
 
 let scale = 1;
-let x = 0;
-let y = 0;
+let posX = 0;
+let posY = 0;
+
 let dragging = false;
-let sx, sy;
+let startX, startY;
 
-/* TRANSFORM */
+/* APPLY OFFSET FUNCTION (+40, +40) */
+function applyOffset(x, y){
+    return { x: x + 40, y: y + 40 };
+}
 
-function update(){
-    map.style.transform =
-        `translate(calc(-50% + ${x}px), calc(-50% + ${y}px)) scale(${scale})`;
+/* MARKERS DATA */
 
-    document.querySelectorAll(".marker").forEach(m => {
-        m.style.transform = `translate(-50%, -50%) scale(${1/scale})`;
-    });
+const markers = [
+
+    { x:496, y:1218, color:"green", title:"Placid Wakes FOB" },
+
+    { x:594, y:1195, color:"red", title:"Red Box",
+        img:"https://operator.coolsquad.xyz/u/RIghwK.png",
+        link:"artifact-001.html"
+    },
+
+    { x:550, y:373, color:"red", title:"The Monolith",
+        img:"https://operator.coolsquad.xyz/u/mH30lg.png",
+        link:"artifact-003.html"
+    },
+
+    { x:690, y:710, color:"yellow", title:"The Church" },
+
+    { x:750, y:541, color:"black", title:"Black Prism" },
+
+    { x:856, y:573, color:"brown", title:"AP Roots" },
+    { x:758, y:739, color:"brown", title:"AP Roots" },
+    { x:279, y:627, color:"brown", title:"AP Roots" },
+    { x:831, y:682, color:"brown", title:"AP Roots" },
+
+    { x:739, y:686, color:"white", title:"Newtons Triangle" },
+    { x:760, y:643, color:"white", title:"Newtons Triangle" },
+    { x:812, y:680, color:"white", title:"Newtons Triangle" }
+
+];
+
+/* CREATE MARKERS */
+
+markers.forEach(m => {
+
+    const dot = document.createElement("div");
+    dot.className = `marker ${m.color}`;
+
+    const adjusted = applyOffset(m.x, m.y);
+
+    dot.style.left = adjusted.x + "px";
+    dot.style.top = adjusted.y + "px";
+
+    dot.onclick = () => {
+
+        let html = `<h3>${m.title}</h3>`;
+
+        if(m.img){
+            html += `<img src="${m.img}">`;
+        }
+
+        if(m.link){
+            html += `<a href="${m.link}">Open Document</a>`;
+        }
+
+        popupContent.innerHTML = html;
+        popup.style.display = "block";
+    };
+
+    container.appendChild(dot);
+});
+
+/* CLOSE POPUP */
+
+function closePopup(){
+    popup.style.display = "none";
 }
 
 /* ZOOM */
 
-function zoomIn(){ scale += 0.1; update(); }
-function zoomOut(){ scale = Math.max(0.2, scale - 0.1); update(); }
+document.getElementById("zoomIn").onclick = () => {
+    scale += 0.1;
+    update();
+};
+
+document.getElementById("zoomOut").onclick = () => {
+    scale = Math.max(0.2, scale - 0.1);
+    update();
+};
 
 /* DRAG */
 
-container.addEventListener("mousedown",(e)=>{
+container.addEventListener("mousedown", e => {
     dragging = true;
-    sx = e.clientX - x;
-    sy = e.clientY - y;
+    startX = e.clientX - posX;
+    startY = e.clientY - posY;
 });
 
-window.addEventListener("mouseup",()=>dragging=false);
+window.addEventListener("mouseup", () => dragging = false);
 
-window.addEventListener("mousemove",(e)=>{
+window.addEventListener("mousemove", e => {
     if(!dragging) return;
-    x = e.clientX - sx;
-    y = e.clientY - sy;
+    posX = e.clientX - startX;
+    posY = e.clientY - startY;
     update();
 });
 
-/* WHEEL ZOOM */
+/* SCROLL ZOOM */
 
-window.addEventListener("wheel",(e)=>{
+window.addEventListener("wheel", e => {
     e.preventDefault();
-    scale += e.deltaY < 0 ? 0.1 : -0.1;
+    scale += (e.deltaY < 0 ? 0.1 : -0.1);
     scale = Math.max(0.2, scale);
     update();
-},{passive:false});
+},{ passive:false });
 
-/* POPUPS */
+/* UPDATE MAP */
 
-const popup = document.getElementById("popup");
-const title = document.getElementById("popupTitle");
-const img = document.getElementById("popupImg");
-const link = document.getElementById("popupLink");
+function update(){
+    map.style.transform =
+        `translate(calc(-50% + ${posX}px), calc(-50% + ${posY}px)) scale(${scale})`;
 
-document.querySelectorAll(".marker").forEach(m=>{
-    m.addEventListener("click",()=>{
-
-        title.innerText = m.dataset.title;
-
-        if(m.dataset.img){
-            img.src = m.dataset.img;
-            img.style.display = "block";
-        } else {
-            img.style.display = "none";
-        }
-
-        if(m.dataset.link){
-            link.href = m.dataset.link;
-            link.innerText = "Open File";
-        } else {
-            link.removeAttribute("href");
-            link.innerText = "";
-        }
-
-        popup.style.display = "block";
+    document.querySelectorAll(".marker").forEach(m => {
+        m.style.transform += "";
     });
-});
-
-popup.addEventListener("click",()=>{
-    popup.style.display = "none";
-});
+}
 
 update();
 
