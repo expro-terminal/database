@@ -200,6 +200,13 @@ RETURN
 
 </div>
 
+    <div class="popup" id="popup">
+    <div id="popupText"></div>
+    <img id="popupImg" style="display:none;">
+    <div id="popupLink"></div>
+    <button onclick="closePopup()">CLOSE</button>
+</div>
+
 <div class="controls">
 
     <button id="zoomIn">+</button>
@@ -212,60 +219,142 @@ RETURN
 const map = document.getElementById("map");
 const container = document.getElementById("mapContainer");
 
+const popup = document.getElementById("popup");
+const popupText = document.getElementById("popupText");
+const popupImg = document.getElementById("popupImg");
+const popupLink = document.getElementById("popupLink");
+
 let scale = 1;
 let posX = 0;
 let posY = 0;
 
 let isDragging = false;
-
 let startX;
 let startY;
 
 /* UPDATE MAP */
-
 function updateMap(){
-
     map.style.transform =
         `translate(calc(-50% + ${posX}px), calc(-50% + ${posY}px)) scale(${scale})`;
+
+    updateMarkers();
+}
+
+/* MARKERS DATA */
+
+const markers = [
+    {x:496, y:1218, color:"green", title:"Placid Wakes FOB"},
+
+    {x:594, y:1195, color:"red", title:"Red Box",
+        img:"https://operator.coolsquad.xyz/u/RIghwK.png",
+        link:"artifact-001.html"
+    },
+
+    {x:550, y:373, color:"red", title:"The Monolith",
+        img:"https://operator.coolsquad.xyz/u/mH30lg.png",
+        link:"artifact-003.html"
+    },
+
+    {x:690, y:710, color:"yellow", title:"The Church"},
+
+    {x:750, y:541, color:"black", title:"Black Prism"},
+
+    {x:856, y:573, color:"brown", title:"AP Roots"},
+    {x:758, y:739, color:"brown", title:"AP Roots"},
+    {x:279, y:627, color:"brown", title:"AP Roots"},
+    {x:831, y:682, color:"brown", title:"AP Roots"},
+
+    {x:739, y:686, color:"white", title:"Newtons Triangle"},
+    {x:760, y:643, color:"white", title:"Newtons Triangle"},
+    {x:812, y:680, color:"white", title:"Newtons Triangle"},
+];
+
+/* CREATE MARKERS */
+
+markers.forEach(m => {
+
+    const el = document.createElement("div");
+    el.className = `marker ${m.color}`;
+
+    el.style.left = m.x + "px";
+    el.style.top = m.y + "px";
+
+    const label = document.createElement("div");
+    label.className = "marker-label";
+    label.innerText = m.title;
+
+    el.appendChild(label);
+
+    el.onclick = () => {
+
+        popupText.innerHTML = `<h3>${m.title}</h3>`;
+
+        popupImg.style.display = "none";
+        popupLink.innerHTML = "";
+
+        if(m.img){
+            popupImg.src = m.img;
+            popupImg.style.display = "block";
+        }
+
+        if(m.link){
+            popupLink.innerHTML =
+                `<br><a href="${m.link}">Open Document</a>`;
+        }
+
+        popup.style.display = "block";
+    };
+
+    map.parentElement.appendChild(el);
+
+});
+
+/* UPDATE MARKER POSITION WITH MAP */
+
+function updateMarkers(){
+
+    document.querySelectorAll(".marker").forEach(m => {
+
+        const x = parseFloat(m.style.left);
+        const y = parseFloat(m.style.top);
+
+        m.style.transform =
+            `translate(-50%, -50%) scale(${scale})`;
+
+    });
+}
+
+/* POPUP */
+
+function closePopup(){
+    popup.style.display = "none";
 }
 
 /* ZOOM */
 
 document.getElementById("zoomIn").onclick = () => {
-
     scale += 0.1;
-
     updateMap();
 };
 
 document.getElementById("zoomOut").onclick = () => {
-
-    scale -= 0.1;
-
-    if(scale < 0.2){
-        scale = 0.2;
-    }
-
+    scale = Math.max(0.2, scale - 0.1);
     updateMap();
 };
 
-/* MOUSE DRAG */
+/* DRAG */
 
 container.addEventListener("mousedown", (e) => {
-
     isDragging = true;
-
     startX = e.clientX - posX;
     startY = e.clientY - posY;
 });
 
 window.addEventListener("mouseup", () => {
-
     isDragging = false;
 });
 
 window.addEventListener("mousemove", (e) => {
-
     if(!isDragging) return;
 
     posX = e.clientX - startX;
@@ -274,97 +363,25 @@ window.addEventListener("mousemove", (e) => {
     updateMap();
 });
 
-    /* MARKERS */
-
-.marker{
-    position:absolute;
-    width:10px;
-    height:10px;
-    border-radius:50%;
-    cursor:pointer;
-    transform:translate(-50%, -50%);
-}
-
-.marker-label{
-    position:absolute;
-    top:-18px;
-    left:50%;
-    transform:translateX(-50%);
-    font-size:10px;
-    white-space:nowrap;
-    color:#00ff88;
-    text-shadow:0 0 5px black;
-    pointer-events:none;
-}
-
-/* COLORS */
-
-.green{ background:#00ff00; }
-.red{ background:#ff2b2b; }
-.yellow{ background:#ffd000; }
-.black{ background:#111; border:1px solid #00ff88; }
-.brown{ background:#8b5a2b; }
-.white{ background:#ffffff; }
-
-/* POPUP */
-
-.popup{
-    position:fixed;
-    top:50%;
-    left:50%;
-    transform:translate(-50%,-50%);
-    background:black;
-    border:1px solid #00ff88;
-    padding:20px;
-    width:320px;
-    z-index:5000;
-    display:none;
-    color:#00ff88;
-}
-
-.popup img{
-    width:100%;
-    margin-top:10px;
-    border:1px solid #00ff88;
-}
-
-.popup a{
-    color:#6ed6ff;
-}
-
-.popup button{
-    margin-top:10px;
-    background:black;
-    color:#00ff88;
-    border:1px solid #00ff88;
-    padding:6px 10px;
-    cursor:pointer;
-}
-
-/* SCROLL ZOOM */
+/* WHEEL ZOOM */
 
 window.addEventListener("wheel", (e) => {
 
     e.preventDefault();
 
-    if(e.deltaY < 0){
+    scale += e.deltaY < 0 ? 0.1 : -0.1;
 
-        scale += 0.1;
-
-    } else {
-
-        scale -= 0.1;
-
-        if(scale < 0.2){
-            scale = 0.2;
-        }
-    }
+    scale = Math.max(0.2, scale);
 
     updateMap();
 
 }, { passive:false });
 
 updateMap();
+
+function closePopup(){
+    popup.style.display = "none";
+}
 
 </script>
 
