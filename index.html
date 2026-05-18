@@ -340,6 +340,7 @@ Available Commands:
 help
 logout
 database
+info
         `, "system");
     }
 }
@@ -382,6 +383,33 @@ ${item.name}
 </a>
         `);
     });
+}
+
+/* INFO */
+
+    function showInfo(){
+
+    addLine("ACCESSING INFORMATION DIRECTORY...", "success");
+
+    const documents = [
+
+        {
+            name:"Exclusion Zone Mapping",
+            link:"mapping.html"
+        }
+
+    ];
+
+    documents.forEach(item => {
+
+        addLine(`
+<a class="database-link" href="${item.link}">
+${item.name}
+</a>
+        `);
+
+    });
+
 }
 
 /* COMMANDS */
@@ -490,6 +518,12 @@ ${prefix.innerText}
                 case "database":
 
                     showDatabase();
+
+                    break;
+
+                    case "info":
+
+                    showInfo();
 
                     break;
 
