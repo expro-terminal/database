@@ -33,18 +33,9 @@ body{ overflow:hidden; background:black; color:#00ff88; }
 }
 
 .marker{
-    position:absolute;
-    width:10px;
-    height:10px;
-    border-radius:50%;
-    margin-left:-5px;
-    margin-top:-5px;
-    cursor:pointer;
-    z-index:10;
-}
-
-.marker .mpopup{
-    z-index:99999; /* extra safety */
+    position:absolute; width:10px; height:10px;
+    border-radius:50%; margin-left:-5px; margin-top:-5px;
+    cursor:pointer; z-index:10;
 }
 .label{
     position:absolute; top:-18px; left:50%;
@@ -68,8 +59,8 @@ body{ overflow:hidden; background:black; color:#00ff88; }
     padding:14px;
     width:220px;
     display:none;
-    z-index:99999;
-    pointer-events:auto;
+    z-index:100;
+    pointer-events:none;
 }
 .mpopup.visible{ display:block; pointer-events:auto; }
 .mpopup h3{ font-size:13px; margin-bottom:8px; }
@@ -185,8 +176,6 @@ body{ overflow:hidden; background:black; color:#00ff88; }
 
     </div>
 </div>
-
-<div class="mpopup" id="globalPopup"></div>
 
 <div id="cursorTip"></div>
 
