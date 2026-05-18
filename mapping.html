@@ -3,7 +3,6 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
 <title>Exclusion Zone Mapping</title>
 
 <style>
@@ -12,13 +11,12 @@
     margin:0;
     padding:0;
     box-sizing:border-box;
+    font-family:"Courier New", monospace;
 }
 
 body{
     overflow:hidden;
     background:black;
-    font-family:"Courier New", monospace;
-    color:#00ff88;
 }
 
 /* TOP BAR */
@@ -28,14 +26,11 @@ body{
     top:0;
     left:0;
     width:100%;
-
     padding:15px 20px;
-
     border-bottom:1px solid #00ff88;
-
     background:rgba(0,0,0,0.9);
-
     z-index:1000;
+    color:#00ff88;
 }
 
 .topbar h1{
@@ -65,43 +60,58 @@ body{
     position:absolute;
     top:50%;
     left:50%;
-    transform:translate(-50%, -50%) scale(1);
-    transform-origin:center;
+    transform-origin:0 0;
     user-select:none;
     -webkit-user-drag:none;
     width:1200px;
+}
+
+/* MARKERS LAYER */
+
+#markerLayer{
+    position:absolute;
+    top:0;
+    left:0;
+    width:1200px;
+    height:auto;
+    pointer-events:none;
+    transform-origin:0 0;
 }
 
 /* MARKERS */
 
 .marker{
     position:absolute;
+    transform:translate(-50%, -50%);
+    pointer-events:auto;
+    cursor:pointer;
+}
+
+.dot{
     width:10px;
     height:10px;
     border-radius:50%;
-    cursor:pointer;
-    z-index:10;
-    transform:translate(-50%, -50%);
+    border:1px solid white;
+    box-shadow:0 0 8px currentColor;
 }
-
-.marker.green{ background:#00ff88; }
-.marker.red{ background:#ff3b3b; }
-.marker.yellow{ background:#ffd000; }
-.marker.black{ background:#111; border:1px solid #00ff88; }
-.marker.brown{ background:#8b5a2b; }
-.marker.white{ background:#ffffff; }
-
-/* LABEL ABOVE DOT */
 
 .label{
     position:absolute;
-    bottom:14px;
-    left:50%;
-    transform:translateX(-50%);
-    font-size:11px;
+    transform:translate(-50%, -130%);
     white-space:nowrap;
+    font-size:12px;
     color:#00ff88;
+    text-shadow:0 0 5px black;
 }
+
+/* COLORS */
+
+.green{ background:#00ff88; color:#00ff88; }
+.red{ background:#ff3b3b; color:#ff3b3b; }
+.yellow{ background:#ffd000; color:#ffd000; }
+.black{ background:#222; color:#888; }
+.brown{ background:#8b5a2b; color:#8b5a2b; }
+.white{ background:#e6e6e6; color:#e6e6e6; }
 
 /* POPUP */
 
@@ -109,16 +119,14 @@ body{
     position:fixed;
     top:50%;
     left:50%;
-    transform:translate(-50%, -50%);
-    width:320px;
-
+    transform:translate(-50%,-50%);
     background:black;
     border:1px solid #00ff88;
-
-    padding:15px;
-
-    display:none;
+    padding:20px;
+    width:320px;
+    color:#00ff88;
     z-index:2000;
+    display:none;
 }
 
 .popup img{
@@ -131,18 +139,12 @@ body{
     color:#6ed6ff;
     display:block;
     margin-top:10px;
-    text-decoration:none;
-}
-
-.popup a:hover{
-    text-decoration:underline;
 }
 
 .close{
-    position:absolute;
-    top:5px;
-    right:8px;
+    float:right;
     cursor:pointer;
+    color:red;
 }
 
 /* CONTROLS */
@@ -151,55 +153,31 @@ body{
     position:fixed;
     bottom:20px;
     right:20px;
-    display:flex;
-    flex-direction:column;
-    gap:10px;
     z-index:1000;
 }
 
 .controls button{
-    width:50px;
-    height:50px;
-    border:1px solid #00ff88;
+    width:45px;
+    height:45px;
+    margin:5px;
     background:black;
+    border:1px solid #00ff88;
     color:#00ff88;
-    font-size:22px;
+    font-size:20px;
     cursor:pointer;
-}
-
-.controls button:hover{
-    background:#00ff88;
-    color:black;
 }
 
 /* BACK */
 
 .back{
     position:fixed;
-    top:20px;
-    right:20px;
+    top:15px;
+    right:15px;
+    z-index:1000;
     border:1px solid #00ff88;
     padding:8px 12px;
     color:#00ff88;
     text-decoration:none;
-    z-index:1000;
-}
-
-/* SCANLINES */
-
-.scanlines{
-    position:fixed;
-    inset:0;
-    pointer-events:none;
-    background:
-        repeating-linear-gradient(
-            to bottom,
-            rgba(255,255,255,0.03),
-            rgba(255,255,255,0.03) 1px,
-            transparent 1px,
-            transparent 3px
-        );
-    z-index:3000;
 }
 
 </style>
@@ -207,169 +185,183 @@ body{
 
 <body>
 
-<div class="scanlines"></div>
+<div class="topbar">
+    <h1>EXCLUSION ZONE MAPPING</h1>
+    <p>Interactive anomaly tracking grid</p>
+</div>
 
 <a class="back" href="index.html">RETURN</a>
 
-<div class="topbar">
-    <h1>EXCLUSION ZONE MAPPING</h1>
-    <p>Interactive anomaly grid interface</p>
-</div>
+<div class="map-container" id="container">
 
-<div class="map-container" id="mapContainer">
-    <img id="map" src="https://operator.coolsquad.xyz/u/luBi56.png">
+    <img src="https://operator.coolsquad.xyz/u/luBi56.png" id="map">
+
+    <div id="markerLayer"></div>
+
 </div>
 
 <div class="controls">
-    <button id="zoomIn">+</button>
-    <button id="zoomOut">-</button>
+    <button id="in">+</button>
+    <button id="out">−</button>
 </div>
 
-<!-- POPUP -->
 <div class="popup" id="popup">
-    <div class="close" onclick="closePopup()">X</div>
+    <span class="close" onclick="closePopup()">X</span>
     <div id="popupContent"></div>
 </div>
 
 <script>
 
 const map = document.getElementById("map");
-const container = document.getElementById("mapContainer");
-const popup = document.getElementById("popup");
-const popupContent = document.getElementById("popupContent");
+const layer = document.getElementById("markerLayer");
+const container = document.getElementById("container");
 
 let scale = 1;
-let posX = 0;
-let posY = 0;
+let x = 0;
+let y = 0;
 
 let dragging = false;
 let startX, startY;
 
-/* APPLY OFFSET FUNCTION (+40, +40) */
-function applyOffset(x, y){
-    return { x: x + 40, y: y + 40 };
-}
+/* MAP SIZE (IMPORTANT FOR COORDINATES) */
+const MAP_W = 1200;
+const MAP_H = 1400;
 
 /* MARKERS DATA */
 
 const markers = [
 
-    { x:496, y:1218, color:"green", title:"Placid Wakes FOB" },
+{ x:496, y:1218, color:"green", title:"Placid Wakes FOB" },
 
-    { x:594, y:1195, color:"red", title:"Red Box",
-        img:"https://operator.coolsquad.xyz/u/RIghwK.png",
-        link:"artifact-001.html"
-    },
+{ x:594, y:1195, color:"red", title:"Red Box",
+  img:"https://operator.coolsquad.xyz/u/RIghwK.png",
+  link:"artifact-001.html"
+},
 
-    { x:550, y:373, color:"red", title:"The Monolith",
-        img:"https://operator.coolsquad.xyz/u/mH30lg.png",
-        link:"artifact-003.html"
-    },
+{ x:550, y:373, color:"red", title:"The Monolith",
+  img:"https://operator.coolsquad.xyz/u/mH30lg.png",
+  link:"artifact-003.html"
+},
 
-    { x:690, y:710, color:"yellow", title:"The Church" },
+{ x:690, y:710, color:"yellow", title:"The Church" },
 
-    { x:750, y:541, color:"black", title:"Black Prism" },
+{ x:750, y:541, color:"black", title:"Black Prism" },
 
-    { x:856, y:573, color:"brown", title:"AP Roots" },
-    { x:758, y:739, color:"brown", title:"AP Roots" },
-    { x:279, y:627, color:"brown", title:"AP Roots" },
-    { x:831, y:682, color:"brown", title:"AP Roots" },
+{ x:856, y:573, color:"brown", title:"AP Roots" },
+{ x:758, y:739, color:"brown", title:"AP Roots" },
+{ x:279, y:627, color:"brown", title:"AP Roots" },
+{ x:831, y:682, color:"brown", title:"AP Roots" },
 
-    { x:739, y:686, color:"white", title:"Newtons Triangle" },
-    { x:760, y:643, color:"white", title:"Newtons Triangle" },
-    { x:812, y:680, color:"white", title:"Newtons Triangle" }
+{ x:739, y:686, color:"white", title:"Newtons Triangle" },
+{ x:760, y:643, color:"white", title:"Newtons Triangle" },
+{ x:812, y:680, color:"white", title:"Newtons Triangle" }
 
 ];
 
-/* CREATE MARKERS */
+/* RENDER MARKERS */
 
-markers.forEach(m => {
+function renderMarkers(){
 
-    const dot = document.createElement("div");
-    dot.className = `marker ${m.color}`;
+    layer.innerHTML = "";
 
-    const adjusted = applyOffset(m.x, m.y);
+    markers.forEach(m => {
 
-    dot.style.left = adjusted.x + "px";
-    dot.style.top = adjusted.y + "px";
+        const el = document.createElement("div");
+        el.className = "marker";
 
-    dot.onclick = () => {
+        el.style.left = m.x + "px";
+        el.style.top = m.y + "px";
 
-        let html = `<h3>${m.title}</h3>`;
+        const dot = document.createElement("div");
+        dot.className = "dot " + m.color;
 
-        if(m.img){
-            html += `<img src="${m.img}">`;
-        }
+        const label = document.createElement("div");
+        label.className = "label";
+        label.textContent = m.title;
 
-        if(m.link){
-            html += `<a href="${m.link}">Open Document</a>`;
-        }
+        el.appendChild(dot);
+        el.appendChild(label);
 
-        popupContent.innerHTML = html;
-        popup.style.display = "block";
-    };
+        el.onclick = () => {
 
-    container.appendChild(dot);
-});
+            let html = `<h3>${m.title}</h3>`;
 
-/* CLOSE POPUP */
+            if(m.img){
+                html += `<img src="${m.img}">`;
+            }
 
-function closePopup(){
-    popup.style.display = "none";
+            if(m.link){
+                html += `<a href="${m.link}">Open File</a>`;
+            }
+
+            openPopup(html);
+        };
+
+        layer.appendChild(el);
+    });
 }
 
-/* ZOOM */
+/* POPUP */
 
-document.getElementById("zoomIn").onclick = () => {
-    scale += 0.1;
-    update();
-};
+function openPopup(html){
+    document.getElementById("popupContent").innerHTML = html;
+    document.getElementById("popup").style.display = "block";
+}
 
-document.getElementById("zoomOut").onclick = () => {
-    scale = Math.max(0.2, scale - 0.1);
-    update();
-};
+function closePopup(){
+    document.getElementById("popup").style.display = "none";
+}
+
+/* TRANSFORM */
+
+function update(){
+
+    const transform =
+        `translate(${x}px, ${y}px) scale(${scale})`;
+
+    map.style.transform = transform;
+    layer.style.transform = transform;
+}
 
 /* DRAG */
 
 container.addEventListener("mousedown", e => {
     dragging = true;
-    startX = e.clientX - posX;
-    startY = e.clientY - posY;
+    startX = e.clientX - x;
+    startY = e.clientY - y;
 });
 
 window.addEventListener("mouseup", () => dragging = false);
 
 window.addEventListener("mousemove", e => {
     if(!dragging) return;
-    posX = e.clientX - startX;
-    posY = e.clientY - startY;
+
+    x = e.clientX - startX;
+    y = e.clientY - startY;
+
     update();
 });
 
-/* SCROLL ZOOM */
+/* ZOOM */
 
-window.addEventListener("wheel", e => {
-    e.preventDefault();
-    scale += (e.deltaY < 0 ? 0.1 : -0.1);
-    scale = Math.max(0.2, scale);
+document.getElementById("in").onclick = () => {
+    scale += 0.1;
     update();
-},{ passive:false });
+};
 
-/* UPDATE MAP */
+document.getElementById("out").onclick = () => {
+    scale = Math.max(0.2, scale - 0.1);
+    update();
+};
 
-function update(){
-    map.style.transform =
-        `translate(calc(-50% + ${posX}px), calc(-50% + ${posY}px)) scale(${scale})`;
-
-    document.querySelectorAll(".marker").forEach(m => {
-        m.style.transform += "";
-    });
-}
-
+renderMarkers();
 update();
 
 </script>
+
+<div class="popup" id="popup">
+    <div id="popupContent"></div>
+</div>
 
 </body>
 </html>
