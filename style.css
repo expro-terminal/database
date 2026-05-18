@@ -4,63 +4,50 @@ body {
   font-family: monospace;
   margin: 0;
   padding: 20px;
-  overflow-x: hidden;
 }
 
-/* BACKGROUND IMAGE */
-#bg-image {
+#bg {
   position: fixed;
   inset: 0;
-  background: url('background.png') center center/cover no-repeat;
+  background: url("background.png") center/cover no-repeat;
   opacity: 0;
-  transition: opacity 2s ease;
+  transition: 2s ease;
   z-index: -2;
 }
 
-/* SCANLINES */
+/* SCANLINES OVERLAY */
 #scanlines {
   position: fixed;
   inset: 0;
   pointer-events: none;
-  z-index: 999;
+  z-index: -1;
+  opacity: 0;
+  transition: opacity 2s ease;
   background: repeating-linear-gradient(
     to bottom,
-    rgba(0,255,100,0.04),
-    rgba(0,255,100,0.04) 1px,
+    rgba(0, 255, 102, 0.05),
+    rgba(0, 255, 102, 0.05) 1px,
     transparent 2px,
     transparent 4px
   );
-  animation: scanmove 8s linear infinite;
-}
-
-@keyframes scanmove {
-  from {
-    transform: translateY(0);
-  }
-
-  to {
-    transform: translateY(10px);
-  }
 }
 
 #header {
   text-align: center;
-  position: relative;
-  z-index: 2;
 }
 
-#terminal-bar {
+#terminal {
   position: fixed;
   bottom: 0;
   width: 100%;
-  background: rgba(5,5,5,0.95);
-  padding: 10px;
   display: flex;
+  gap: 10px;
+  padding: 10px;
   border-top: 1px solid #00ff66;
-  backdrop-filter: blur(2px);
+  background: rgba(0,0,0,0.9);
 }
 
-#terminal-bar span {
+#prompt {
   white-space: nowrap;
 }
 
@@ -69,8 +56,8 @@ input {
   background: transparent;
   border: none;
   color: #00ff66;
-  font-family: monospace;
   outline: none;
+  font-family: monospace;
 }
 
 a {
@@ -79,6 +66,13 @@ a {
 
 #output {
   margin-bottom: 80px;
-  position: relative;
-  z-index: 2;
+}
+
+/* ACTIVE STATE */
+body.logged-in #bg {
+  opacity: 0.15;
+}
+
+body.logged-in #scanlines {
+  opacity: 0.25;
 }
