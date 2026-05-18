@@ -180,7 +180,9 @@ body{
 
 <div class="map-container" id="mapContainer">
 
-    <img src="https://operator.coolsquad.xyz/u/luBi56.png" id="map">
+    <div class="map-layer" id="mapLayer">
+
+        <img src="https://operator.coolsquad.xyz/u/luBi56.png" id="map">
 
     <!-- MARKERS -->
     <div class="marker green" style="top:1218px; left:496px;"
@@ -261,17 +263,24 @@ body{
 
 <script>
 
-const map = document.getElementById("map");
-const container = document.getElementById("mapContainer");
+const layer = document.getElementById("mapLayer");
 
 let scale = 1;
 let x = 0;
 let y = 0;
 
-/* DRAG */
-
 let dragging = false;
 let startX, startY;
+
+function update(){
+
+    layer.style.transform =
+        `translate(${x}px, ${y}px) scale(${scale})`;
+}
+
+/* DRAG */
+
+const container = document.getElementById("mapContainer");
 
 container.addEventListener("mousedown", e=>{
     dragging = true;
@@ -279,28 +288,38 @@ container.addEventListener("mousedown", e=>{
     startY = e.clientY - y;
 });
 
-window.addEventListener("mouseup", ()=> dragging=false);
+window.addEventListener("mouseup", ()=> dragging = false);
 
 window.addEventListener("mousemove", e=>{
     if(!dragging) return;
+
     x = e.clientX - startX;
     y = e.clientY - startY;
+
     update();
 });
 
 /* ZOOM */
 
-function zoomIn(){ scale += 0.1; update(); }
-function zoomOut(){ scale = Math.max(0.2, scale-0.1); update(); }
-
-function update(){
-    map.style.transform =
-        `translate(${x}px, ${y}px) scale(${scale})`;
-
-    document.querySelectorAll(".marker").forEach(m=>{
-        m.style.transform = `translate(${x}px, ${y}px) scale(${scale})`;
-    });
+function zoomIn(){
+    scale += 0.1;
+    update();
 }
+
+function zoomOut(){
+    scale = Math.max(0.2, scale - 0.1);
+    update();
+}
+
+window.addEventListener("wheel", e=>{
+    e.preventDefault();
+
+    if(e.deltaY < 0) scale += 0.1;
+    else scale = Math.max(0.2, scale - 0.1);
+
+    update();
+
+}, { passive:false });
 
 /* POPUP */
 
