@@ -2,162 +2,166 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>PROJECT DARKSTATE</title>
 
 <style>
-    *{
-        margin:0;
-        padding:0;
-        box-sizing:border-box;
-        font-family: "Courier New", monospace;
-    }
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:"Courier New", monospace;
+}
 
-    body{
-        background:#000;
-        color:#00ff88;
-        overflow:hidden;
-        height:100vh;
-    }
+body{
+    background:black;
+    color:#00ff88;
+    overflow:hidden;
+    height:100vh;
+}
 
-    /* BACKGROUND IMAGE */
-    .bg-image{
-        position:fixed;
-        inset:0;
-        background:url('https://operator.coolsquad.xyz/u/YYTRKF.png') center/cover;
+/* SMALLER BACKGROUND IMAGE */
+.bg-image{
+    position:fixed;
+    inset:0;
+    background:
+        url('https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?q=80&w=1200&auto=format&fit=crop')
+        center center / 500px auto no-repeat;
+    opacity:0;
+    transition:opacity 1s ease;
+    z-index:-3;
+}
+
+.bg-image.active{
+    opacity:0.07;
+}
+
+/* SCANLINES */
+.scanlines{
+    position:fixed;
+    inset:0;
+    pointer-events:none;
+    z-index:-1;
+
+    background:
+        repeating-linear-gradient(
+            to bottom,
+            rgba(255,255,255,0.03),
+            rgba(255,255,255,0.03) 1px,
+            transparent 1px,
+            transparent 3px
+        );
+
+    animation:scanMove 7s linear infinite;
+}
+
+@keyframes scanMove{
+    from{
+        background-position:0 0;
+    }
+    to{
+        background-position:0 100px;
+    }
+}
+
+/* TERMINAL */
+.terminal{
+    display:flex;
+    flex-direction:column;
+    justify-content:space-between;
+    height:100vh;
+    padding:20px;
+}
+
+.output{
+    overflow-y:auto;
+    white-space:pre-wrap;
+    padding-bottom:20px;
+}
+
+.line{
+    margin-bottom:8px;
+}
+
+.system{
+    color:#88ffcc;
+}
+
+.error{
+    color:#ff5555;
+}
+
+.success{
+    color:#7dff7d;
+}
+
+.database-link{
+    display:block;
+    color:#6ecfff;
+    margin-top:6px;
+    text-decoration:none;
+}
+
+.database-link:hover{
+    text-decoration:underline;
+}
+
+/* TOP INFO */
+.top-info{
+    margin-bottom:20px;
+}
+
+.title{
+    font-size:28px;
+    margin-bottom:10px;
+    text-shadow:0 0 10px #00ff88;
+}
+
+.subtitle{
+    color:#85ffbe;
+    margin-bottom:5px;
+}
+
+.clock{
+    color:#73d0a3;
+    margin-top:8px;
+}
+
+/* INPUT BAR */
+.input-area{
+    border-top:1px solid #00ff88;
+    padding-top:12px;
+    display:flex;
+    align-items:center;
+    gap:10px;
+}
+
+.prefix{
+    color:#00ff88;
+    white-space:nowrap;
+}
+
+#commandInput{
+    flex:1;
+    background:transparent;
+    border:none;
+    outline:none;
+    color:#00ff88;
+    font-size:16px;
+}
+
+.cursor{
+    width:10px;
+    height:18px;
+    background:#00ff88;
+    animation:blink 1s infinite;
+}
+
+@keyframes blink{
+    50%{
         opacity:0;
-        transition:opacity 1s ease;
-        z-index:-3;
     }
-
-    .bg-image.active{
-        opacity:0.08;
-    }
-
-    /* SCANLINES */
-    .scanlines{
-        position:fixed;
-        inset:0;
-        pointer-events:none;
-        z-index:-1;
-        background:
-            repeating-linear-gradient(
-                to bottom,
-                rgba(255,255,255,0.03),
-                rgba(255,255,255,0.03) 1px,
-                transparent 1px,
-                transparent 3px
-            );
-        animation:scanMove 6s linear infinite;
-    }
-
-    @keyframes scanMove{
-        from{
-            background-position:0 0;
-        }
-        to{
-            background-position:0 100px;
-        }
-    }
-
-    /* TERMINAL */
-    .terminal{
-        height:100vh;
-        display:flex;
-        flex-direction:column;
-        justify-content:space-between;
-        padding:20px;
-    }
-
-    .output{
-        overflow-y:auto;
-        padding-bottom:20px;
-        white-space:pre-wrap;
-    }
-
-    .line{
-        margin-bottom:8px;
-    }
-
-    .system{
-        color:#00ffaa;
-    }
-
-    .error{
-        color:#ff4d4d;
-    }
-
-    .success{
-        color:#7dff7d;
-    }
-
-    .database-link{
-        display:block;
-        color:#6ed6ff;
-        text-decoration:none;
-        margin-top:6px;
-    }
-
-    .database-link:hover{
-        text-decoration:underline;
-    }
-
-    /* INPUT BAR */
-    .input-area{
-        border-top:1px solid #00ff88;
-        padding-top:12px;
-        display:flex;
-        align-items:center;
-        gap:10px;
-    }
-
-    .prefix{
-        color:#00ff88;
-        white-space:nowrap;
-    }
-
-    #commandInput{
-        flex:1;
-        background:transparent;
-        border:none;
-        outline:none;
-        color:#00ff88;
-        font-size:16px;
-    }
-
-    .cursor{
-        display:inline-block;
-        width:10px;
-        background:#00ff88;
-        animation:blink 1s infinite;
-        margin-left:3px;
-    }
-
-    @keyframes blink{
-        50%{
-            opacity:0;
-        }
-    }
-
-    .top-info{
-        margin-bottom:20px;
-    }
-
-    .title{
-        font-size:28px;
-        margin-bottom:10px;
-        text-shadow:0 0 10px #00ff88;
-    }
-
-    .subtitle{
-        color:#84ffbd;
-        margin-bottom:8px;
-    }
-
-    .clock{
-        color:#74d6a5;
-        margin-top:5px;
-    }
+}
 </style>
 </head>
 <body>
@@ -171,8 +175,13 @@
 
         <div class="top-info">
             <div class="title">PROJECT DARKSTATE DATABASE</div>
-            <div class="subtitle" id="loginStatus">You're logged in as "Guest"</div>
-            <div class="subtitle" id="expeditionText"></div>
+
+            <div class="subtitle" id="loginStatus">
+                You're logged in as "Guest"
+            </div>
+
+            <div class="subtitle" id="researchText"></div>
+
             <div class="clock" id="clock"></div>
         </div>
 
@@ -188,192 +197,283 @@
 
     <div class="input-area">
         <span class="prefix" id="prefix">[ Guest@s80.host : ~ ]</span>
-        <input type="text" id="commandInput" autofocus autocomplete="off">
-        <span class="cursor"></span>
+
+        <input
+            type="text"
+            id="commandInput"
+            autocomplete="off"
+            autofocus
+        >
+
+        <div class="cursor"></div>
     </div>
 
 </div>
 
 <script>
-    const output = document.getElementById("output");
-    const input = document.getElementById("commandInput");
-    const prefix = document.getElementById("prefix");
-    const loginStatus = document.getElementById("loginStatus");
-    const expeditionText = document.getElementById("expeditionText");
-    const bgImage = document.getElementById("bgImage");
+const output = document.getElementById("output");
+const input = document.getElementById("commandInput");
+const prefix = document.getElementById("prefix");
+const loginStatus = document.getElementById("loginStatus");
+const researchText = document.getElementById("researchText");
+const bgImage = document.getElementById("bgImage");
 
-    let loggedIn = false;
-    let username = "Guest";
+let loggedIn = false;
+let username = "Guest";
 
-    // CLOCK
-    function updateClock(){
-        const now = new Date();
+/* LOGIN STATES */
+let loginMode = false;
+let passwordMode = false;
+let tempUsername = "";
 
-        const formatted =
-            now.toLocaleDateString() + " | " +
-            now.toLocaleTimeString();
+/* CLOCK */
+function updateClock(){
 
-        document.getElementById("clock").innerText = formatted;
+    const now = new Date();
+
+    const formatted =
+        now.toLocaleDateString() +
+        " | " +
+        now.toLocaleTimeString();
+
+    document.getElementById("clock").innerText = formatted;
+}
+
+setInterval(updateClock, 1000);
+updateClock();
+
+/* OUTPUT */
+function addLine(text, className=""){
+
+    const div = document.createElement("div");
+
+    div.className = "line " + className;
+
+    div.innerHTML = text;
+
+    output.appendChild(div);
+
+    output.scrollTop = output.scrollHeight;
+}
+
+/* UI UPDATE */
+function updateUI(){
+
+    prefix.textContent =
+        `[ ${username}@s80.host : ~ ]`;
+
+    loginStatus.innerHTML =
+        `You're logged in as "${username}"`;
+
+    if(loggedIn){
+
+        researchText.innerHTML =
+            "Expeditionary Projects - Research Section";
+
+        bgImage.classList.add("active");
+
+    } else {
+
+        researchText.innerHTML = "";
+
+        bgImage.classList.remove("active");
     }
+}
 
-    setInterval(updateClock, 1000);
-    updateClock();
+/* HELP */
+function showHelp(){
 
-    // ADD OUTPUT
-    function addLine(text, className=""){
-        const div = document.createElement("div");
-        div.className = "line " + className;
-        div.innerHTML = text;
-        output.appendChild(div);
+    if(!loggedIn){
 
-        output.scrollTop = output.scrollHeight;
-    }
-
-    // UPDATE UI
-    function updateUI(){
-        prefix.textContent = `[ ${username}@s80.host : ~ ]`;
-        loginStatus.innerHTML = `You're logged in as "${username}"`;
-
-        if(loggedIn){
-            expeditionText.innerHTML = "Expeditionary Projects";
-            bgImage.classList.add("active");
-        } else {
-            expeditionText.innerHTML = "";
-            bgImage.classList.remove("active");
-        }
-    }
-
-    // HELP
-    function showHelp(){
-        if(!loggedIn){
-            addLine(`
+        addLine(`
 Available Commands:
 - help
 - login
-            `, "system");
-        } else {
-            addLine(`
+        `, "system");
+
+    } else {
+
+        addLine(`
 Available Commands:
 - help
 - logout
 - database
-            `, "system");
-        }
+        `, "system");
     }
+}
 
-    // DATABASE
-    function showDatabase(){
-        addLine("ACCESSING ARTIFACT DATABASE...", "success");
+/* DATABASE */
+function showDatabase(){
 
-        const links = [
-            {
-                name: "Artifact 001 - The Hollow Signal",
-                page: "artifact-001.html"
-            },
-            {
-                name: "Artifact 002 - Blacksite Echo",
-                page: "artifact-002.html"
-            },
-            {
-                name: "Artifact 003 - The Janus File",
-                page: "artifact-003.html"
-            }
-        ];
+    addLine(
+        "ACCESSING ARTIFACT DATABASE...",
+        "success"
+    );
 
-        links.forEach(link => {
-            addLine(
-                `<a class="database-link" href="${link.page}">
-                    ${link.name}
-                </a>`
-            );
-        });
-    }
+    const links = [
 
-    // COMMAND HANDLER
-    input.addEventListener("keydown", function(e){
+        {
+            name:"Artifact 001 - The Hollow Signal",
+            page:"artifact-001.html"
+        },
 
-        if(e.key === "Enter"){
+        {
+            name:"Artifact 002 - Blacksite Echo",
+            page:"artifact-002.html"
+        },
 
-            const command = input.value.trim();
-            addLine(
-                `<span style="color:#00ff88">${prefix.textContent}</span> ${command}`
-            );
-
-            const lower = command.toLowerCase();
-
-            // BEFORE LOGIN
-            if(!loggedIn){
-
-                switch(lower){
-
-                    case "help":
-                        showHelp();
-                        break;
-
-                    case "login":
-
-                        const enteredUser = prompt("ENTER USERNAME");
-                        const enteredPass = prompt("ENTER PASSWORD");
-
-                        // Simple ARG login system
-                        if(
-                            enteredUser === "darkstate" &&
-                            enteredPass === "expedition"
-                        ){
-                            loggedIn = true;
-                            username = enteredUser;
-
-                            updateUI();
-
-                            addLine("AUTHENTICATION SUCCESSFUL", "success");
-                            addLine("ACCESS GRANTED", "success");
-
-                        } else {
-                            addLine("ACCESS DENIED", "error");
-                        }
-
-                        break;
-
-                    default:
-                        addLine("UNKNOWN COMMAND", "error");
-                }
-
-            }
-
-            // AFTER LOGIN
-            else {
-
-                switch(lower){
-
-                    case "help":
-                        showHelp();
-                        break;
-
-                    case "logout":
-
-                        loggedIn = false;
-                        username = "Guest";
-
-                        updateUI();
-
-                        addLine("SESSION TERMINATED", "error");
-                        break;
-
-                    case "database":
-                        showDatabase();
-                        break;
-
-                    default:
-                        addLine("UNKNOWN COMMAND", "error");
-                }
-            }
-
-            input.value = "";
+        {
+            name:"Artifact 003 - The Janus File",
+            page:"artifact-003.html"
         }
+    ];
 
+    links.forEach(link => {
+
+        addLine(`
+            <a class="database-link" href="${link.page}">
+                ${link.name}
+            </a>
+        `);
     });
+}
 
-    updateUI();
+/* COMMAND INPUT */
+input.addEventListener("keydown", function(e){
+
+    if(e.key !== "Enter") return;
+
+    const command = input.value.trim();
+
+    addLine(
+        `<span style="color:#00ff88">${prefix.textContent}</span> ${command}`
+    );
+
+    /* LOGIN USERNAME STEP */
+    if(loginMode){
+
+        tempUsername = command;
+
+        loginMode = false;
+        passwordMode = true;
+
+        addLine("ENTER PASSWORD:", "system");
+
+        input.value = "";
+        return;
+    }
+
+    /* PASSWORD STEP */
+    if(passwordMode){
+
+        passwordMode = false;
+
+        const enteredPassword = command;
+
+        if(
+            tempUsername === "EP1EXPROEXL" &&
+            enteredPassword === "fatchud123"
+        ){
+
+            loggedIn = true;
+            username = tempUsername;
+
+            updateUI();
+
+            addLine(
+                "AUTHENTICATION SUCCESSFUL",
+                "success"
+            );
+
+            addLine(
+                "ACCESS GRANTED",
+                "success"
+            );
+
+        } else {
+
+            addLine(
+                "ACCESS DENIED",
+                "error"
+            );
+        }
+
+        input.value = "";
+        return;
+    }
+
+    const lower = command.toLowerCase();
+
+    /* BEFORE LOGIN */
+    if(!loggedIn){
+
+        switch(lower){
+
+            case "help":
+                showHelp();
+                break;
+
+            case "login":
+
+                loginMode = true;
+
+                addLine(
+                    "ENTER USERNAME:",
+                    "system"
+                );
+
+                break;
+
+            default:
+
+                addLine(
+                    "UNKNOWN COMMAND",
+                    "error"
+                );
+        }
+
+    }
+
+    /* AFTER LOGIN */
+    else {
+
+        switch(lower){
+
+            case "help":
+                showHelp();
+                break;
+
+            case "logout":
+
+                loggedIn = false;
+                username = "Guest";
+
+                updateUI();
+
+                addLine(
+                    "SESSION TERMINATED",
+                    "error"
+                );
+
+                break;
+
+            case "database":
+                showDatabase();
+                break;
+
+            default:
+
+                addLine(
+                    "UNKNOWN COMMAND",
+                    "error"
+                );
+        }
+    }
+
+    input.value = "";
+});
+
+updateUI();
 </script>
 
 </body>
