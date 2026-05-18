@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 <title>Exclusion Zone Mapping</title>
 
 <style>
@@ -11,12 +12,13 @@
     margin:0;
     padding:0;
     box-sizing:border-box;
-    font-family:"Courier New", monospace;
 }
 
 body{
     overflow:hidden;
     background:black;
+    font-family:"Courier New", monospace;
+    color:#00ff88;
 }
 
 /* TOP BAR */
@@ -26,74 +28,283 @@ body{
     top:0;
     left:0;
     width:100%;
-    padding:15px;
+
+    padding:15px 20px;
+
     border-bottom:1px solid #00ff88;
+
     background:rgba(0,0,0,0.9);
+
     z-index:1000;
-    color:#00ff88;
 }
 
-/* VIEWPORT */
+.topbar h1{
+    font-size:24px;
+    margin-bottom:5px;
+}
 
-#viewport{
+.topbar p{
+    color:#7dffb2;
+    font-size:14px;
+}
+
+/* MAP CONTAINER */
+
+.map-container{
     width:100vw;
     height:100vh;
+
     overflow:hidden;
-    position:relative;
+
     cursor:grab;
+
+    position:relative;
 }
 
-#viewport:active{
+.map-container:active{
     cursor:grabbing;
 }
 
-/* WORLD (THIS IS THE IMPORTANT FIX) */
-
-#world{
-    position:absolute;
-    top:0;
-    left:0;
-    transform-origin:0 0;
-}
-
-/* MAP */
+/* MAP IMAGE */
 
 #map{
+    position:absolute;
+
+    top:50%;
+    left:50%;
+
+    transform:translate(-50%, -50%) scale(1);
+
+    transform-origin:center center;
+
+    user-select:none;
+    -webkit-user-drag:none;
+
+    max-width:none;
+
     width:1200px;
-    display:block;
 }
 
-/* MARKERS */
+/* CONTROLS */
+
+.controls{
+    position:fixed;
+
+    bottom:20px;
+    right:20px;
+
+    display:flex;
+    flex-direction:column;
+
+    gap:10px;
+
+    z-index:1000;
+}
+
+.controls button{
+    width:50px;
+    height:50px;
+
+    border:1px solid #00ff88;
+
+    background:black;
+
+    color:#00ff88;
+
+    font-size:24px;
+
+    cursor:pointer;
+
+    transition:0.2s;
+}
+
+.controls button:hover{
+    background:#00ff88;
+    color:black;
+}
+
+/* BACK BUTTON */
+
+.back{
+    position:fixed;
+
+    top:20px;
+    right:20px;
+
+    color:#00ff88;
+
+    text-decoration:none;
+
+    border:1px solid #00ff88;
+
+    padding:10px 15px;
+
+    z-index:1001;
+
+    transition:0.2s;
+}
+
+.back:hover{
+    background:#00ff88;
+    color:black;
+}
+
+/* SCANLINES */
+
+.scanlines{
+    position:fixed;
+    inset:0;
+
+    pointer-events:none;
+
+    background:
+    repeating-linear-gradient(
+        to bottom,
+        rgba(255,255,255,0.03),
+        rgba(255,255,255,0.03) 1px,
+        transparent 1px,
+        transparent 3px
+    );
+
+    z-index:2000;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="scanlines"></div>
+
+<a href="index.html" class="back">
+RETURN
+</a>
+
+<div class="topbar">
+
+    <h1>EXCLUSION ZONE MAPPING</h1>
+
+    <p>
+        Interactive terrain and anomaly mapping interface.
+    </p>
+
+</div>
+
+<div class="map-container" id="mapContainer">
+
+    <img
+        src="https://operator.coolsquad.xyz/u/luBi56.png"
+        id="map"
+        draggable="false"
+    >
+
+</div>
+
+<div class="controls">
+
+    <button id="zoomIn">+</button>
+    <button id="zoomOut">−</button>
+
+</div>
+
+<script>
+
+const map = document.getElementById("map");
+const container = document.getElementById("mapContainer");
+
+let scale = 1;
+let posX = 0;
+let posY = 0;
+
+let isDragging = false;
+
+let startX;
+let startY;
+
+/* UPDATE MAP */
+
+function updateMap(){
+
+    map.style.transform =
+        `translate(calc(-50% + ${posX}px), calc(-50% + ${posY}px)) scale(${scale})`;
+}
+
+/* ZOOM */
+
+document.getElementById("zoomIn").onclick = () => {
+
+    scale += 0.1;
+
+    updateMap();
+};
+
+document.getElementById("zoomOut").onclick = () => {
+
+    scale -= 0.1;
+
+    if(scale < 0.2){
+        scale = 0.2;
+    }
+
+    updateMap();
+};
+
+/* MOUSE DRAG */
+
+container.addEventListener("mousedown", (e) => {
+
+    isDragging = true;
+
+    startX = e.clientX - posX;
+    startY = e.clientY - posY;
+});
+
+window.addEventListener("mouseup", () => {
+
+    isDragging = false;
+});
+
+window.addEventListener("mousemove", (e) => {
+
+    if(!isDragging) return;
+
+    posX = e.clientX - startX;
+    posY = e.clientY - startY;
+
+    updateMap();
+});
+
+    /* MARKERS */
 
 .marker{
     position:absolute;
-    transform:translate(-50%, -50%);
-    cursor:pointer;
-}
-
-.dot{
     width:10px;
     height:10px;
     border-radius:50%;
+    cursor:pointer;
+    transform:translate(-50%, -50%);
 }
 
-.label{
+.marker-label{
     position:absolute;
-    transform:translate(-50%, -140%);
-    font-size:12px;
+    top:-18px;
+    left:50%;
+    transform:translateX(-50%);
+    font-size:10px;
     white-space:nowrap;
     color:#00ff88;
     text-shadow:0 0 5px black;
+    pointer-events:none;
 }
 
 /* COLORS */
 
-.green{ background:#00ff88; }
-.red{ background:#ff3b3b; }
+.green{ background:#00ff00; }
+.red{ background:#ff2b2b; }
 .yellow{ background:#ffd000; }
-.black{ background:#222; }
+.black{ background:#111; border:1px solid #00ff88; }
 .brown{ background:#8b5a2b; }
-.white{ background:#e6e6e6; }
+.white{ background:#ffffff; }
 
 /* POPUP */
 
@@ -106,8 +317,8 @@ body{
     border:1px solid #00ff88;
     padding:20px;
     width:320px;
+    z-index:5000;
     display:none;
-    z-index:2000;
     color:#00ff88;
 }
 
@@ -119,195 +330,41 @@ body{
 
 .popup a{
     color:#6ed6ff;
-    display:block;
+}
+
+.popup button{
     margin-top:10px;
-}
-
-/* CONTROLS */
-
-.controls{
-    position:fixed;
-    bottom:20px;
-    right:20px;
-    z-index:1000;
-}
-
-.controls button{
-    width:45px;
-    height:45px;
-    margin:5px;
-    border:1px solid #00ff88;
     background:black;
     color:#00ff88;
+    border:1px solid #00ff88;
+    padding:6px 10px;
     cursor:pointer;
 }
 
-</style>
-</head>
+/* SCROLL ZOOM */
 
-<body>
+window.addEventListener("wheel", (e) => {
 
-<div class="topbar">
-    EXCLUSION ZONE MAPPING
-</div>
+    e.preventDefault();
 
-<div id="viewport">
+    if(e.deltaY < 0){
 
-    <div id="world">
+        scale += 0.1;
 
-        <img id="map" src="https://operator.coolsquad.xyz/u/luBi56.png">
+    } else {
 
-        <div id="markers"></div>
+        scale -= 0.1;
 
-    </div>
-
-</div>
-
-<div class="controls">
-    <button onclick="zoomIn()">+</button>
-    <button onclick="zoomOut()">−</button>
-</div>
-
-<div class="popup" id="popup"></div>
-
-<script>
-
-const world = document.getElementById("world");
-const viewport = document.getElementById("viewport");
-const markerLayer = document.getElementById("markers");
-
-let scale = 1;
-let x = 0;
-let y = 0;
-
-let dragging = false;
-let startX, startY;
-
-/* MARKERS */
-
-const markers = [
-
-{ x:496, y:1218, color:"green", title:"Placid Wakes FOB" },
-
-{ x:594, y:1195, color:"red", title:"Red Box",
-  img:"https://operator.coolsquad.xyz/u/RIghwK.png",
-  link:"artifact-001.html"
-},
-
-{ x:550, y:373, color:"red", title:"The Monolith",
-  img:"https://operator.coolsquad.xyz/u/mH30lg.png",
-  link:"artifact-003.html"
-},
-
-{ x:690, y:710, color:"yellow", title:"The Church" },
-
-{ x:750, y:541, color:"black", title:"Black Prism" },
-
-{ x:856, y:573, color:"brown", title:"AP Roots" },
-{ x:758, y:739, color:"brown", title:"AP Roots" },
-{ x:279, y:627, color:"brown", title:"AP Roots" },
-{ x:831, y:682, color:"brown", title:"AP Roots" },
-
-{ x:739, y:686, color:"white", title:"Newtons Triangle" },
-{ x:760, y:643, color:"white", title:"Newtons Triangle" },
-{ x:812, y:680, color:"white", title:"Newtons Triangle" }
-
-];
-
-/* BUILD MARKERS */
-
-function buildMarkers(){
-
-    markerLayer.innerHTML = "";
-
-    markers.forEach(m => {
-
-        const el = document.createElement("div");
-        el.className = "marker";
-
-        el.style.left = m.x + "px";
-        el.style.top = m.y + "px";
-
-        const dot = document.createElement("div");
-        dot.className = "dot " + m.color;
-
-        const label = document.createElement("div");
-        label.className = "label";
-        label.textContent = m.title;
-
-        el.appendChild(dot);
-        el.appendChild(label);
-
-        el.onclick = () => {
-
-            let html = `<h3>${m.title}</h3>`;
-
-            if(m.img){
-                html += `<img src="${m.img}">`;
-            }
-
-            if(m.link){
-                html += `<a href="${m.link}">Open File</a>`;
-            }
-
-            document.getElementById("popup").innerHTML = html;
-            document.getElementById("popup").style.display = "block";
-        };
-
-        markerLayer.appendChild(el);
-    });
-}
-
-/* TRANSFORM */
-
-function update(){
-
-    world.style.transform =
-        `translate(${x}px, ${y}px) scale(${scale})`;
-}
-
-/* ZOOM */
-
-function zoomIn(){
-    scale += 0.1;
-    update();
-}
-
-function zoomOut(){
-    scale = Math.max(0.2, scale - 0.1);
-    update();
-}
-
-/* DRAG */
-
-viewport.addEventListener("mousedown", e => {
-    dragging = true;
-    startX = e.clientX - x;
-    startY = e.clientY - y;
-});
-
-window.addEventListener("mouseup", () => dragging = false);
-
-window.addEventListener("mousemove", e => {
-
-    if(!dragging) return;
-
-    x = e.clientX - startX;
-    y = e.clientY - startY;
-
-    update();
-});
-
-/* CLOSE POPUP */
-
-window.addEventListener("click", e => {
-    if(e.target.id === "popup"){
-        document.getElementById("popup").style.display = "none";
+        if(scale < 0.2){
+            scale = 0.2;
+        }
     }
-});
 
-buildMarkers();
-update();
+    updateMap();
+
+}, { passive:false });
+
+updateMap();
 
 </script>
 
