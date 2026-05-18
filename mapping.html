@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Exclusion Zone Mapping</title>
+
+<style>
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+body{
+    overflow:hidden;
+    background:black;
+    font-family:"Courier New", monospace;
+    color:#00ff88;
+}
+
+/* TOP BAR */
+
+.topbar{
+    position:fixed;
+    top:0;
+    left:0;
+    width:100%;
+
+    padding:15px 20px;
+
+    border-bottom:1px solid #00ff88;
+
+    background:rgba(0,0,0,0.9);
+
+    z-index:1000;
+}
+
+.topbar h1{
+    font-size:24px;
+    margin-bottom:5px;
+}
+
+.topbar p{
+    color:#7dffb2;
+    font-size:14px;
+}
+
+/* MAP CONTAINER */
+
+.map-container{
+    width:100vw;
+    height:100vh;
+
+    overflow:hidden;
+
+    cursor:grab;
+
+    position:relative;
+}
+
+.map-container:active{
+    cursor:grabbing;
+}
+
+/* MAP IMAGE */
+
+#map{
+    position:absolute;
+
+    top:50%;
+    left:50%;
+
+    transform:translate(-50%, -50%) scale(1);
+
+    transform-origin:center center;
+
+    user-select:none;
+    -webkit-user-drag:none;
+
+    max-width:none;
+
+    width:1200px;
+}
+
+/* CONTROLS */
+
+.controls{
+    position:fixed;
+
+    bottom:20px;
+    right:20px;
+
+    display:flex;
+    flex-direction:column;
+
+    gap:10px;
+
+    z-index:1000;
+}
+
+.controls button{
+    width:50px;
+    height:50px;
+
+    border:1px solid #00ff88;
+
+    background:black;
+
+    color:#00ff88;
+
+    font-size:24px;
+
+    cursor:pointer;
+
+    transition:0.2s;
+}
+
+.controls button:hover{
+    background:#00ff88;
+    color:black;
+}
+
+/* BACK BUTTON */
+
+.back{
+    position:fixed;
+
+    top:20px;
+    right:20px;
+
+    color:#00ff88;
+
+    text-decoration:none;
+
+    border:1px solid #00ff88;
+
+    padding:10px 15px;
+
+    z-index:1001;
+
+    transition:0.2s;
+}
+
+.back:hover{
+    background:#00ff88;
+    color:black;
+}
+
+/* SCANLINES */
+
+.scanlines{
+    position:fixed;
+    inset:0;
+
+    pointer-events:none;
+
+    background:
+    repeating-linear-gradient(
+        to bottom,
+        rgba(255,255,255,0.03),
+        rgba(255,255,255,0.03) 1px,
+        transparent 1px,
+        transparent 3px
+    );
+
+    z-index:2000;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="scanlines"></div>
+
+<a href="index.html" class="back">
+RETURN
+</a>
+
+<div class="topbar">
+
+    <h1>EXCLUSION ZONE MAPPING</h1>
+
+    <p>
+        Interactive terrain and anomaly mapping interface.
+    </p>
+
+</div>
+
+<div class="map-container" id="mapContainer">
+
+    <img
+        src="https://operator.coolsquad.xyz/u/luBi56.png"
+        id="map"
+        draggable="false"
+    >
+
+</div>
+
+<div class="controls">
+
+    <button id="zoomIn">+</button>
+    <button id="zoomOut">−</button>
+
+</div>
+
+<script>
+
+const map = document.getElementById("map");
+const container = document.getElementById("mapContainer");
+
+let scale = 1;
+let posX = 0;
+let posY = 0;
+
+let isDragging = false;
+
+let startX;
+let startY;
+
+/* UPDATE MAP */
+
+function updateMap(){
+
+    map.style.transform =
+        `translate(calc(-50% + ${posX}px), calc(-50% + ${posY}px)) scale(${scale})`;
+}
+
+/* ZOOM */
+
+document.getElementById("zoomIn").onclick = () => {
+
+    scale += 0.1;
+
+    updateMap();
+};
+
+document.getElementById("zoomOut").onclick = () => {
+
+    scale -= 0.1;
+
+    if(scale < 0.2){
+        scale = 0.2;
+    }
+
+    updateMap();
+};
+
+/* MOUSE DRAG */
+
+container.addEventListener("mousedown", (e) => {
+
+    isDragging = true;
+
+    startX = e.clientX - posX;
+    startY = e.clientY - posY;
+});
+
+window.addEventListener("mouseup", () => {
+
+    isDragging = false;
+});
+
+window.addEventListener("mousemove", (e) => {
+
+    if(!isDragging) return;
+
+    posX = e.clientX - startX;
+    posY = e.clientY - startY;
+
+    updateMap();
+});
+
+/* SCROLL ZOOM */
+
+window.addEventListener("wheel", (e) => {
+
+    e.preventDefault();
+
+    if(e.deltaY < 0){
+
+        scale += 0.1;
+
+    } else {
+
+        scale -= 0.1;
+
+        if(scale < 0.2){
+            scale = 0.2;
+        }
+    }
+
+    updateMap();
+
+}, { passive:false });
+
+updateMap();
+
+</script>
+
+</body>
+</html>
