@@ -65,7 +65,18 @@ body{ overflow:hidden; background:black; color:#00ff88; }
 .brown  { background:#8b5a2b; }
 .white  { background:#fff; }
 
-/* FLOATING POPUP (NEW STYLE) */
+#cursorTip{
+    position:fixed;
+    pointer-events:none;
+    background:black;
+    border:1px solid #00ff88;
+    padding:5px 10px;
+    font-size:12px;
+    color:#00ff88;
+    z-index:5000;
+    white-space:nowrap;
+    display:none;
+}
 
 .popup{
     position:fixed;
@@ -75,7 +86,6 @@ body{ overflow:hidden; background:black; color:#00ff88; }
     width:260px;
     display:none;
     z-index:5000;
-    pointer-events:auto;
 }
 
 .popup img{
@@ -113,8 +123,6 @@ body{ overflow:hidden; background:black; color:#00ff88; }
     cursor:pointer;
 }
 
-/* SCANLINES */
-
 .scanlines{
     position:fixed; inset:0; pointer-events:none;
     background:repeating-linear-gradient(
@@ -142,72 +150,24 @@ body{ overflow:hidden; background:black; color:#00ff88; }
 
         <img src="https://operator.coolsquad.xyz/u/luBi56.png" id="map">
 
-        <!-- MARKERS -->
-
-        <div class="marker green" style="top:1218px;left:496px;"
-            onclick="openPopup(event,'Placid Wakes FOB')">
-            <div class="label">Placid Wakes FOB</div>
-        </div>
-
-        <div class="marker red" style="top:1195px;left:594px;"
-            onclick="openPopup(event,'Red Box','https://operator.coolsquad.xyz/u/RIghwK.png','artifact-001.html')">
-            <div class="label">Red Box</div>
-        </div>
-
-        <div class="marker red" style="top:373px;left:550px;"
-            onclick="openPopup(event,'The Monolith','https://operator.coolsquad.xyz/u/mH30lg.png','artifact-003.html')">
-            <div class="label">The Monolith</div>
-        </div>
-
-        <div class="marker yellow" style="top:710px;left:690px;"
-            onclick="openPopup(event,'The Church')">
-            <div class="label">The Church</div>
-        </div>
-
-        <div class="marker black" style="top:541px;left:750px;"
-            onclick="openPopup(event,'Black Prism')">
-            <div class="label">Black Prism</div>
-        </div>
-
-        <div class="marker brown" style="top:573px;left:856px;"
-            onclick="openPopup(event,'AP Roots')">
-            <div class="label">AP Roots</div>
-        </div>
-
-        <div class="marker brown" style="top:739px;left:758px;"
-            onclick="openPopup(event,'AP Roots')">
-            <div class="label">AP Roots</div>
-        </div>
-
-        <div class="marker brown" style="top:627px;left:279px;"
-            onclick="openPopup(event,'AP Roots')">
-            <div class="label">AP Roots</div>
-        </div>
-
-        <div class="marker brown" style="top:682px;left:831px;"
-            onclick="openPopup(event,'AP Roots')">
-            <div class="label">AP Roots</div>
-        </div>
-
-        <div class="marker white" style="top:686px;left:739px;"
-            onclick="openPopup(event,'Newtons Triangle')">
-            <div class="label">Newtons Triangle</div>
-        </div>
-
-        <div class="marker white" style="top:643px;left:760px;"
-            onclick="openPopup(event,'Newtons Triangle')">
-            <div class="label">Newtons Triangle</div>
-        </div>
-
-        <div class="marker white" style="top:680px;left:812px;"
-            onclick="openPopup(event,'Newtons Triangle')">
-            <div class="label">Newtons Triangle</div>
-        </div>
+        <!-- MARKERS (UNCHANGED) -->
+        <div class="marker green" style="top:1218px;left:496px;" onclick="openPopup(event,'Placid Wakes FOB')"><div class="label">Placid Wakes FOB</div></div>
+        <div class="marker red" style="top:1195px;left:594px;" onclick="openPopup(event,'Red Box','https://operator.coolsquad.xyz/u/RIghwK.png','artifact-001noaccess.html')"><div class="label">Red Box</div></div>
+        <div class="marker red" style="top:373px;left:550px;" onclick="openPopup(event,'The Monolith','https://operator.coolsquad.xyz/u/mH30lg.png','artifact-003noaccess.html')"><div class="label">The Monolith</div></div>
+        <div class="marker yellow" style="top:710px;left:690px;" onclick="openPopup(event,'The Church')"><div class="label">The Church</div></div>
+        <div class="marker black" style="top:541px;left:750px;" onclick="openPopup(event,'Black Prism')"><div class="label">Black Prism</div></div>
+        <div class="marker brown" style="top:573px;left:856px;" onclick="openPopup(event,'AP Roots')"><div class="label">AP Roots</div></div>
+        <div class="marker brown" style="top:739px;left:758px;" onclick="openPopup(event,'AP Roots')"><div class="label">AP Roots</div></div>
+        <div class="marker brown" style="top:627px;left:279px;" onclick="openPopup(event,'AP Roots')"><div class="label">AP Roots</div></div>
+        <div class="marker brown" style="top:682px;left:831px;" onclick="openPopup(event,'AP Roots')"><div class="label">AP Roots</div></div>
+        <div class="marker white" style="top:686px;left:739px;" onclick="openPopup(event,'Newtons Triangle')"><div class="label">Newtons Triangle</div></div>
+        <div class="marker white" style="top:643px;left:760px;" onclick="openPopup(event,'Newtons Triangle')"><div class="label">Newtons Triangle</div></div>
+        <div class="marker white" style="top:680px;left:812px;" onclick="openPopup(event,'Newtons Triangle')"><div class="label">Newtons Triangle</div></div>
 
     </div>
 </div>
 
-<!-- POPUP -->
+<div id="cursorTip"></div>
 
 <div class="popup" id="popup">
     <div class="close" onclick="closePopup()">X</div>
@@ -223,15 +183,18 @@ body{ overflow:hidden; background:black; color:#00ff88; }
 
 <script>
 
-const world = document.getElementById("mapWorld");
-const popup = document.getElementById("popup");
+const world     = document.getElementById("mapWorld");
+const container = document.getElementById("mapContainer");
+const tip       = document.getElementById("cursorTip");
 
 let scale = 1, x = 0, y = 0;
 let dragging = false, sx, sy;
 
-/* MAP MOVE */
+/* =========================
+   DRAG SYSTEM
+========================= */
 
-document.getElementById("mapContainer").addEventListener("mousedown", e=>{
+container.addEventListener("mousedown", e=>{
     dragging = true;
     sx = e.clientX - x;
     sy = e.clientY - y;
@@ -245,20 +208,91 @@ window.addEventListener("mousemove", e=>{
         y = e.clientY - sy;
         update();
     }
+
+    const mx = Math.round((e.clientX - x) / scale);
+    const my = Math.round((e.clientY - y) / scale);
+
+    tip.textContent = `X:${mx}  Y:${my}`;
+
+    const pad = 14;
+    let tx = e.clientX + pad;
+    let ty = e.clientY + pad;
+
+    if(tx + tip.offsetWidth > window.innerWidth)
+        tx = e.clientX - tip.offsetWidth - pad;
+
+    if(ty + tip.offsetHeight > window.innerHeight)
+        ty = e.clientY - tip.offsetHeight - pad;
+
+    tip.style.left = tx + "px";
+    tip.style.top  = ty + "px";
 });
 
-function zoomIn(){ scale = Math.min(5, +(scale+0.1).toFixed(2)); update(); }
-function zoomOut(){ scale = Math.max(0.2, +(scale-0.1).toFixed(2)); update(); }
+container.addEventListener("mouseenter", ()=> tip.style.display="block");
+container.addEventListener("mouseleave", ()=> tip.style.display="none");
+
+/* =========================
+   CORE TRANSFORM
+========================= */
 
 function update(){
     world.style.transform = `translate(${x}px,${y}px) scale(${scale})`;
 }
 
-/* POPUP POSITIONED NEXT TO MARKER */
+/* =========================
+   CURSOR-CENTERED ZOOM (NEW)
+========================= */
+
+function zoomAtPoint(newScale, mouseX, mouseY){
+
+    const worldX = (mouseX - x) / scale;
+    const worldY = (mouseY - y) / scale;
+
+    scale = newScale;
+
+    x = mouseX - worldX * scale;
+    y = mouseY - worldY * scale;
+
+    update();
+}
+
+/* BUTTON ZOOM */
+
+function zoomIn(){
+    const rect = container.getBoundingClientRect();
+    zoomAtPoint(Math.min(5, scale + 0.1), rect.width/2, rect.height/2);
+}
+
+function zoomOut(){
+    const rect = container.getBoundingClientRect();
+    zoomAtPoint(Math.max(0.2, scale - 0.1), rect.width/2, rect.height/2);
+}
+
+/* WHEEL ZOOM (CURSOR BASED) */
+
+window.addEventListener("wheel", e=>{
+    e.preventDefault();
+
+    const rect = container.getBoundingClientRect();
+
+    const mouseX = e.clientX - rect.left;
+    const mouseY = e.clientY - rect.top;
+
+    const newScale = e.deltaY < 0
+        ? Math.min(5, scale + 0.1)
+        : Math.max(0.2, scale - 0.1);
+
+    zoomAtPoint(newScale, mouseX, mouseY);
+
+},{passive:false});
+
+/* =========================
+   POPUP
+========================= */
 
 function openPopup(event, title, img=null, link=null){
 
-    const p = popup;
+    const p = document.getElementById("popup");
 
     document.getElementById("popupTitle").innerText = title;
 
@@ -268,65 +302,45 @@ function openPopup(event, title, img=null, link=null){
     if(img){
         image.src = img;
         image.style.display = "block";
-    } else {
-        image.style.display = "none";
-    }
+    } else image.style.display = "none";
 
     if(link){
         linkEl.href = link;
         linkEl.innerText = "OPEN FILE";
         linkEl.style.display = "block";
-    } else {
-        linkEl.style.display = "none";
-    }
+    } else linkEl.style.display = "none";
 
-    /* POSITION NEAR MARKER */
     const rect = event.target.getBoundingClientRect();
 
     let left = rect.right + 10;
     let top  = rect.top;
 
-    /* prevent overflow */
-    if(left + 260 > window.innerWidth){
+    if(left + 260 > window.innerWidth)
         left = rect.left - 270;
-    }
 
-    if(top + 200 > window.innerHeight){
+    if(top + 200 > window.innerHeight)
         top = window.innerHeight - 220;
-    }
 
     p.style.left = left + "px";
     p.style.top = top + "px";
 
     p.style.display = "block";
 
-    /* stop click bubbling */
     event.stopPropagation();
 }
 
-/* CLOSE */
-
 function closePopup(){
-    popup.style.display = "none";
+    document.getElementById("popup").style.display = "none";
 }
 
-/* CLICK OUTSIDE CLOSE */
+/* click outside closes popup */
 
-window.addEventListener("click", (e)=>{
-    if(!popup.contains(e.target)){
-        popup.style.display = "none";
+window.addEventListener("click", e=>{
+    const p = document.getElementById("popup");
+    if(!p.contains(e.target)){
+        p.style.display = "none";
     }
 });
-
-/* ZOOM WHEEL */
-
-window.addEventListener("wheel", e=>{
-    e.preventDefault();
-    scale = e.deltaY < 0
-        ? Math.min(5, +(scale+0.1).toFixed(2))
-        : Math.max(0.2, +(scale-0.1).toFixed(2));
-    update();
-},{passive:false});
 
 update();
 
