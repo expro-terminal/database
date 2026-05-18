@@ -3,9 +3,11 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>PROJECT DARKSTATE</title>
+
+<title>PROJECT DARKSTATE DATABASE</title>
 
 <style>
+
 *{
     margin:0;
     padding:0;
@@ -21,27 +23,31 @@ body{
 }
 
 /* SMALLER BACKGROUND IMAGE */
+
 .bg-image{
     position:fixed;
     inset:0;
-    background:url('https://operator.coolsquad.xyz/u/CBkG4n.png')
-    center center / 35% no-repeat;
+
+    background:
+        url('https://operator.coolsquad.xyz/u/CBkG4n.png')
+        center center / 40% no-repeat;
+
     opacity:0;
     transition:opacity 1s ease;
+
     z-index:-3;
     filter:brightness(0.8);
 }
 
 .bg-image.active{
-    opacity:0.10;
+    opacity:0.06;
 }
 
 /* SCANLINES */
+
 .scanlines{
     position:fixed;
     inset:0;
-    pointer-events:none;
-    z-index:-1;
 
     background:
     repeating-linear-gradient(
@@ -52,10 +58,14 @@ body{
         transparent 3px
     );
 
-    animation:scanMove 8s linear infinite;
+    animation:scan 5s linear infinite;
+
+    pointer-events:none;
+
+    z-index:-1;
 }
 
-@keyframes scanMove{
+@keyframes scan{
     from{
         background-position:0 0;
     }
@@ -66,18 +76,49 @@ body{
 }
 
 /* TERMINAL */
+
 .terminal{
     height:100vh;
+
     display:flex;
     flex-direction:column;
     justify-content:space-between;
+
     padding:20px;
 }
 
+/* CENTER TOP */
+
+.top-info{
+    text-align:center;
+    margin-top:10px;
+    margin-bottom:25px;
+}
+
+.main-title{
+    font-size:32px;
+    margin-bottom:10px;
+
+    text-shadow:0 0 10px #00ff88;
+}
+
+.info-line{
+    margin-top:5px;
+    color:#8effc1;
+}
+
+.clock{
+    margin-top:8px;
+    color:#73d1a0;
+}
+
+/* OUTPUT */
+
 .output{
     overflow-y:auto;
-    padding-bottom:20px;
+    flex:1;
     white-space:pre-wrap;
+    padding-bottom:20px;
 }
 
 .line{
@@ -85,51 +126,36 @@ body{
 }
 
 .system{
-    color:#7dffb5;
+    color:#74ffb0;
 }
 
 .error{
-    color:#ff5c5c;
+    color:#ff4d4d;
 }
 
 .success{
-    color:#76ff76;
+    color:#9dff9d;
 }
+
+/* DATABASE LINKS */
 
 .database-link{
     display:block;
+    margin-top:8px;
     color:#6ed6ff;
     text-decoration:none;
-    margin-top:6px;
 }
 
 .database-link:hover{
     text-decoration:underline;
 }
 
-.top-info{
-    margin-bottom:20px;
-}
+/* INPUT BAR */
 
-.title{
-    font-size:28px;
-    margin-bottom:10px;
-    text-shadow:0 0 10px #00ff88;
-}
-
-.subtitle{
-    margin-bottom:8px;
-    color:#88ffc3;
-}
-
-.clock{
-    color:#77dba6;
-}
-
-/* COMMAND BAR */
 .input-area{
     border-top:1px solid #00ff88;
     padding-top:12px;
+
     display:flex;
     align-items:center;
     gap:10px;
@@ -141,9 +167,11 @@ body{
 
 #commandInput{
     flex:1;
+
     background:transparent;
     border:none;
     outline:none;
+
     color:#00ff88;
     font-size:16px;
 }
@@ -152,6 +180,7 @@ body{
     width:10px;
     height:18px;
     background:#00ff88;
+
     animation:blink 1s infinite;
 }
 
@@ -160,6 +189,7 @@ body{
         opacity:0;
     }
 }
+
 </style>
 </head>
 
@@ -170,75 +200,94 @@ body{
 
 <div class="terminal">
 
-    <div class="output" id="output">
+    <!-- TOP INFO -->
 
-        <div class="top-info">
-            <div class="title">
-                PROJECT DARKSTATE DATABASE
-            </div>
+    <div class="top-info">
 
-            <div class="subtitle" id="loginStatus">
-                You're logged in as "Guest"
-            </div>
-
-            <div class="subtitle" id="sectionText"></div>
-
-            <div class="clock" id="clock"></div>
+        <div class="main-title">
+            PROJECT DARKSTATE DATABASE
         </div>
+
+        <div class="info-line" id="loginStatus">
+            You're logged in as "Guest"
+        </div>
+
+        <div class="info-line" id="researchText"></div>
+
+        <div class="clock" id="clock"></div>
+
+    </div>
+
+    <!-- TERMINAL OUTPUT -->
+
+    <div class="output" id="output">
 
         <div class="line system">
             Welcome to the Project Darkstate Database
         </div>
 
         <div class="line">
-            Type "help" for available commands.
+            Type "help" to begin.
         </div>
 
     </div>
 
+    <!-- INPUT -->
+
     <div class="input-area">
+
         <span class="prefix" id="prefix">
             [ Guest@s80.host : ~ ]
         </span>
 
-        <input type="text" id="commandInput" autocomplete="off" autofocus />
+        <input type="text" id="commandInput" autocomplete="off" autofocus>
 
         <div class="cursor"></div>
+
     </div>
 
 </div>
 
 <script>
+
 const output = document.getElementById("output");
 const input = document.getElementById("commandInput");
+
 const prefix = document.getElementById("prefix");
+
 const loginStatus = document.getElementById("loginStatus");
-const sectionText = document.getElementById("sectionText");
+const researchText = document.getElementById("researchText");
+
 const bgImage = document.getElementById("bgImage");
 
 let loggedIn = false;
 let username = "Guest";
 
 /* CLOCK */
+
 function updateClock(){
 
     const now = new Date();
 
-    document.getElementById("clock").innerText =
+    const timeString =
         now.toLocaleDateString() +
         " | " +
         now.toLocaleTimeString();
+
+    document.getElementById("clock").innerText = timeString;
 }
 
 setInterval(updateClock, 1000);
 updateClock();
 
-/* OUTPUT */
+/* ADD OUTPUT */
+
 function addLine(text, className=""){
 
     const div = document.createElement("div");
 
     div.className = "line " + className;
+
     div.innerHTML = text;
 
     output.appendChild(div);
@@ -246,85 +295,92 @@ function addLine(text, className=""){
     output.scrollTop = output.scrollHeight;
 }
 
-/* UI UPDATE */
+/* UPDATE UI */
+
 function updateUI(){
 
-    prefix.textContent = `[ ${username}@s80.host : ~ ]`;
+    prefix.innerText = `[ ${username}@s80.host : ~ ]`;
 
     loginStatus.innerHTML =
         `You're logged in as "${username}"`;
 
     if(loggedIn){
 
-        sectionText.innerHTML =
+        researchText.innerHTML =
             "Expeditionary Projects - Research Section";
 
         bgImage.classList.add("active");
 
     } else {
 
-        sectionText.innerHTML = "";
+        researchText.innerHTML = "";
 
         bgImage.classList.remove("active");
     }
 }
 
 /* HELP */
+
 function showHelp(){
 
     if(!loggedIn){
 
         addLine(`
 Available Commands:
-- help
-- login USERNAME PASSWORD
 
-Example:
-login EP1EXPROEXL fatchud123
+help
+login USERNAME PASSWORD
         `, "system");
 
     } else {
 
         addLine(`
 Available Commands:
-- help
-- logout
-- database
+
+help
+logout
+database
         `, "system");
     }
 }
 
 /* DATABASE */
+
 function showDatabase(){
 
-    addLine("OPENING ARTIFACT DATABASE...", "success");
+    addLine("ACCESSING ARTIFACT DATABASE...", "success");
 
     const artifacts = [
+
         {
-            title:"Artifact 001 - The Hollow Signal",
-            page:"artifact-001.html"
+            name:"Artifact 001 - The Hollow Signal",
+            link:"artifact-001.html"
         },
+
         {
-            title:"Artifact 002 - Blacksite Echo",
-            page:"artifact-002.html"
+            name:"Artifact 002 - Blacksite Echo",
+            link:"artifact-002.html"
         },
+
         {
-            title:"Artifact 003 - Janus Protocol",
-            page:"artifact-003.html"
+            name:"Artifact 003 - The Janus File",
+            link:"artifact-003.html"
         }
+
     ];
 
-    artifacts.forEach(artifact => {
+    artifacts.forEach(item => {
 
         addLine(`
-<a class="database-link" href="${artifact.page}">
-${artifact.title}
+<a class="database-link" href="${item.link}">
+${item.name}
 </a>
         `);
     });
 }
 
 /* COMMANDS */
+
 input.addEventListener("keydown", function(e){
 
     if(e.key === "Enter"){
@@ -332,19 +388,25 @@ input.addEventListener("keydown", function(e){
         const command = input.value.trim();
 
         addLine(`
-<span style="color:#00ff88">${prefix.textContent}</span> ${command}
+<span style="color:#00ff88">
+${prefix.innerText}
+</span> ${command}
         `);
 
         const parts = command.split(" ");
-        const base = parts[0]?.toLowerCase();
+
+        const baseCommand = parts[0]?.toLowerCase();
 
         /* BEFORE LOGIN */
+
         if(!loggedIn){
 
-            switch(base){
+            switch(baseCommand){
 
                 case "help":
+
                     showHelp();
+
                     break;
 
                 case "login":
@@ -358,6 +420,7 @@ input.addEventListener("keydown", function(e){
                     ){
 
                         loggedIn = true;
+
                         username = user;
 
                         updateUI();
@@ -389,20 +452,25 @@ input.addEventListener("keydown", function(e){
                         "error"
                     );
             }
+
         }
 
         /* AFTER LOGIN */
+
         else {
 
-            switch(base){
+            switch(baseCommand){
 
                 case "help":
+
                     showHelp();
+
                     break;
 
                 case "logout":
 
                     loggedIn = false;
+
                     username = "Guest";
 
                     updateUI();
@@ -415,7 +483,9 @@ input.addEventListener("keydown", function(e){
                     break;
 
                 case "database":
+
                     showDatabase();
+
                     break;
 
                 default:
@@ -432,6 +502,7 @@ input.addEventListener("keydown", function(e){
 });
 
 updateUI();
+
 </script>
 
 </body>
