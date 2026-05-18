@@ -3,7 +3,6 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
 <title>Exclusion Zone Mapping</title>
 
 <style>
@@ -12,12 +11,12 @@
     margin:0;
     padding:0;
     box-sizing:border-box;
+    font-family:"Courier New", monospace;
 }
 
 body{
     overflow:hidden;
     background:black;
-    font-family:"Courier New", monospace;
     color:#00ff88;
 }
 
@@ -28,125 +27,129 @@ body{
     top:0;
     left:0;
     width:100%;
-
-    padding:15px 20px;
-
+    padding:12px 20px;
     border-bottom:1px solid #00ff88;
-
     background:rgba(0,0,0,0.9);
-
     z-index:1000;
 }
 
 .topbar h1{
-    font-size:24px;
-    margin-bottom:5px;
+    font-size:20px;
 }
 
-.topbar p{
-    color:#7dffb2;
-    font-size:14px;
-}
-
-/* MAP CONTAINER */
+/* MAP */
 
 .map-container{
     width:100vw;
     height:100vh;
-
     overflow:hidden;
-
-    cursor:grab;
-
     position:relative;
+    cursor:grab;
 }
 
 .map-container:active{
     cursor:grabbing;
 }
 
-/* MAP IMAGE */
-
 #map{
     position:absolute;
+    top:0;
+    left:0;
+    width:1200px;
+    user-select:none;
+    pointer-events:none;
+}
 
+/* MARKERS */
+
+.marker{
+    position:absolute;
+    width:10px;
+    height:10px;
+    border-radius:50%;
+    transform:translate(-50%, -50%);
+    cursor:pointer;
+    z-index:10;
+}
+
+.marker:hover .label{
+    opacity:1;
+}
+
+.label{
+    position:absolute;
+    top:-18px;
+    left:50%;
+    transform:translateX(-50%);
+    font-size:12px;
+    white-space:nowrap;
+    opacity:1;
+    color:#00ff88;
+}
+
+/* COLORS */
+
+.green{ background:#00ff88; }
+.red{ background:#ff3b3b; }
+.yellow{ background:#ffd000; }
+.black{ background:#111; border:1px solid #00ff88; }
+.brown{ background:#8b5a2b; }
+.white{ background:#fff; }
+
+/* POPUP */
+
+.popup{
+    position:fixed;
     top:50%;
     left:50%;
+    transform:translate(-50%, -50%);
+    background:black;
+    border:1px solid #00ff88;
+    padding:20px;
+    width:320px;
+    display:none;
+    z-index:2000;
+}
 
-    transform:translate(-50%, -50%) scale(1);
+.popup img{
+    width:100%;
+    margin-top:10px;
+    border:1px solid #00ff88;
+}
 
-    transform-origin:center center;
+.popup a{
+    display:block;
+    margin-top:10px;
+    color:#6ed6ff;
+}
 
-    user-select:none;
-    -webkit-user-drag:none;
-
-    max-width:none;
-
-    width:1200px;
+.close{
+    position:absolute;
+    top:5px;
+    right:10px;
+    cursor:pointer;
 }
 
 /* CONTROLS */
 
 .controls{
     position:fixed;
-
     bottom:20px;
     right:20px;
-
     display:flex;
     flex-direction:column;
-
     gap:10px;
-
     z-index:1000;
 }
 
 .controls button{
     width:50px;
     height:50px;
-
-    border:1px solid #00ff88;
-
     background:black;
-
-    color:#00ff88;
-
-    font-size:24px;
-
-    cursor:pointer;
-
-    transition:0.2s;
-}
-
-.controls button:hover{
-    background:#00ff88;
-    color:black;
-}
-
-/* BACK BUTTON */
-
-.back{
-    position:fixed;
-
-    top:20px;
-    right:20px;
-
-    color:#00ff88;
-
-    text-decoration:none;
-
     border:1px solid #00ff88;
-
-    padding:10px 15px;
-
-    z-index:1001;
-
-    transition:0.2s;
-}
-
-.back:hover{
-    background:#00ff88;
-    color:black;
+    color:#00ff88;
+    font-size:20px;
+    cursor:pointer;
 }
 
 /* SCANLINES */
@@ -154,19 +157,14 @@ body{
 .scanlines{
     position:fixed;
     inset:0;
-
     pointer-events:none;
-
-    background:
-    repeating-linear-gradient(
+    background:repeating-linear-gradient(
         to bottom,
         rgba(255,255,255,0.03),
         rgba(255,255,255,0.03) 1px,
         transparent 1px,
         transparent 3px
     );
-
-    z-index:2000;
 }
 
 </style>
@@ -176,42 +174,89 @@ body{
 
 <div class="scanlines"></div>
 
-<a href="index.html" class="back">
-RETURN
-</a>
-
 <div class="topbar">
-
     <h1>EXCLUSION ZONE MAPPING</h1>
-
-    <p>
-        Interactive terrain and anomaly mapping interface.
-    </p>
-
 </div>
 
 <div class="map-container" id="mapContainer">
 
-    <img
-        src="https://operator.coolsquad.xyz/u/luBi56.png"
-        id="map"
-        draggable="false"
-    >
+    <img src="https://operator.coolsquad.xyz/u/luBi56.png" id="map">
+
+    <!-- MARKERS -->
+    <div class="marker green" style="top:1218px; left:496px;"
+        onclick="openPopup('Placid Wakes FOB')">
+        <div class="label">Placid Wakes FOB</div>
+    </div>
+
+    <div class="marker red" style="top:1195px; left:594px;"
+        onclick="openPopup('Red Box', 'https://operator.coolsquad.xyz/u/RIghwK.png', 'artifact-001.html')">
+        <div class="label">Red Box</div>
+    </div>
+
+    <div class="marker red" style="top:373px; left:550px;"
+        onclick="openPopup('The Monolith', 'https://operator.coolsquad.xyz/u/mH30lg.png', 'artifact-003.html')">
+        <div class="label">The Monolith</div>
+    </div>
+
+    <div class="marker yellow" style="top:710px; left:690px;"
+        onclick="openPopup('The Church')">
+        <div class="label">The Church</div>
+    </div>
+
+    <div class="marker black" style="top:541px; left:750px;"
+        onclick="openPopup('Black Prism')">
+        <div class="label">Black Prism</div>
+    </div>
+
+    <div class="marker brown" style="top:573px; left:856px;"
+        onclick="openPopup('AP Roots')">
+        <div class="label">AP Roots</div>
+    </div>
+
+    <div class="marker brown" style="top:739px; left:758px;"
+        onclick="openPopup('AP Roots')">
+        <div class="label">AP Roots</div>
+    </div>
+
+    <div class="marker brown" style="top:627px; left:279px;"
+        onclick="openPopup('AP Roots')">
+        <div class="label">AP Roots</div>
+    </div>
+
+    <div class="marker brown" style="top:682px; left:831px;"
+        onclick="openPopup('AP Roots')">
+        <div class="label">AP Roots</div>
+    </div>
+
+    <div class="marker white" style="top:686px; left:739px;"
+        onclick="openPopup('Newtons Triangle')">
+        <div class="label">Newtons Triangle</div>
+    </div>
+
+    <div class="marker white" style="top:643px; left:760px;"
+        onclick="openPopup('Newtons Triangle')">
+        <div class="label">Newtons Triangle</div>
+    </div>
+
+    <div class="marker white" style="top:680px; left:812px;"
+        onclick="openPopup('Newtons Triangle')">
+        <div class="label">Newtons Triangle</div>
+    </div>
 
 </div>
 
-    <div class="popup" id="popup">
-    <div id="popupText"></div>
+<!-- POPUP -->
+<div class="popup" id="popup">
+    <div class="close" onclick="closePopup()">X</div>
+    <h3 id="popupTitle"></h3>
     <img id="popupImg" style="display:none;">
-    <div id="popupLink"></div>
-    <button onclick="closePopup()">CLOSE</button>
+    <a id="popupLink" target="_blank"></a>
 </div>
 
+<!-- CONTROLS -->
 <div class="controls">
-
-    <button id="zoomIn">+</button>
-    <button id="zoomOut">−</button>
-
+    <button onclick="zoomIn()">+</button>
+    <button onclick="zoomOut()">−</button>
 </div>
 
 <script>
@@ -219,169 +264,84 @@ RETURN
 const map = document.getElementById("map");
 const container = document.getElementById("mapContainer");
 
-const popup = document.getElementById("popup");
-const popupText = document.getElementById("popupText");
-const popupImg = document.getElementById("popupImg");
-const popupLink = document.getElementById("popupLink");
-
 let scale = 1;
-let posX = 0;
-let posY = 0;
+let x = 0;
+let y = 0;
 
-let isDragging = false;
-let startX;
-let startY;
+/* DRAG */
 
-/* UPDATE MAP */
-function updateMap(){
-    map.style.transform =
-        `translate(calc(-50% + ${posX}px), calc(-50% + ${posY}px)) scale(${scale})`;
+let dragging = false;
+let startX, startY;
 
-    updateMarkers();
-}
-
-/* MARKERS DATA */
-
-const markers = [
-    {x:496, y:1218, color:"green", title:"Placid Wakes FOB"},
-
-    {x:594, y:1195, color:"red", title:"Red Box",
-        img:"https://operator.coolsquad.xyz/u/RIghwK.png",
-        link:"artifact-001.html"
-    },
-
-    {x:550, y:373, color:"red", title:"The Monolith",
-        img:"https://operator.coolsquad.xyz/u/mH30lg.png",
-        link:"artifact-003.html"
-    },
-
-    {x:690, y:710, color:"yellow", title:"The Church"},
-
-    {x:750, y:541, color:"black", title:"Black Prism"},
-
-    {x:856, y:573, color:"brown", title:"AP Roots"},
-    {x:758, y:739, color:"brown", title:"AP Roots"},
-    {x:279, y:627, color:"brown", title:"AP Roots"},
-    {x:831, y:682, color:"brown", title:"AP Roots"},
-
-    {x:739, y:686, color:"white", title:"Newtons Triangle"},
-    {x:760, y:643, color:"white", title:"Newtons Triangle"},
-    {x:812, y:680, color:"white", title:"Newtons Triangle"},
-];
-
-/* CREATE MARKERS */
-
-markers.forEach(m => {
-
-    const el = document.createElement("div");
-    el.className = `marker ${m.color}`;
-
-    el.style.left = m.x + "px";
-    el.style.top = m.y + "px";
-
-    const label = document.createElement("div");
-    label.className = "marker-label";
-    label.innerText = m.title;
-
-    el.appendChild(label);
-
-    el.onclick = () => {
-
-        popupText.innerHTML = `<h3>${m.title}</h3>`;
-
-        popupImg.style.display = "none";
-        popupLink.innerHTML = "";
-
-        if(m.img){
-            popupImg.src = m.img;
-            popupImg.style.display = "block";
-        }
-
-        if(m.link){
-            popupLink.innerHTML =
-                `<br><a href="${m.link}">Open Document</a>`;
-        }
-
-        popup.style.display = "block";
-    };
-
-    map.parentElement.appendChild(el);
-
+container.addEventListener("mousedown", e=>{
+    dragging = true;
+    startX = e.clientX - x;
+    startY = e.clientY - y;
 });
 
-/* UPDATE MARKER POSITION WITH MAP */
+window.addEventListener("mouseup", ()=> dragging=false);
 
-function updateMarkers(){
+window.addEventListener("mousemove", e=>{
+    if(!dragging) return;
+    x = e.clientX - startX;
+    y = e.clientY - startY;
+    update();
+});
 
-    document.querySelectorAll(".marker").forEach(m => {
+/* ZOOM */
 
-        const x = parseFloat(m.style.left);
-        const y = parseFloat(m.style.top);
+function zoomIn(){ scale += 0.1; update(); }
+function zoomOut(){ scale = Math.max(0.2, scale-0.1); update(); }
 
-        m.style.transform =
-            `translate(-50%, -50%) scale(${scale})`;
+function update(){
+    map.style.transform =
+        `translate(${x}px, ${y}px) scale(${scale})`;
 
+    document.querySelectorAll(".marker").forEach(m=>{
+        m.style.transform = `translate(${x}px, ${y}px) scale(${scale})`;
     });
 }
 
 /* POPUP */
 
-function closePopup(){
-    popup.style.display = "none";
+function openPopup(title, img=null, link=null){
+
+    document.getElementById("popup").style.display="block";
+    document.getElementById("popupTitle").innerText = title;
+
+    const image = document.getElementById("popupImg");
+    const linkEl = document.getElementById("popupLink");
+
+    if(img){
+        image.src = img;
+        image.style.display="block";
+    } else {
+        image.style.display="none";
+    }
+
+    if(link){
+        linkEl.href = link;
+        linkEl.innerText = "OPEN FILE";
+        linkEl.style.display="block";
+    } else {
+        linkEl.style.display="none";
+    }
 }
 
-/* ZOOM */
-
-document.getElementById("zoomIn").onclick = () => {
-    scale += 0.1;
-    updateMap();
-};
-
-document.getElementById("zoomOut").onclick = () => {
-    scale = Math.max(0.2, scale - 0.1);
-    updateMap();
-};
-
-/* DRAG */
-
-container.addEventListener("mousedown", (e) => {
-    isDragging = true;
-    startX = e.clientX - posX;
-    startY = e.clientY - posY;
-});
-
-window.addEventListener("mouseup", () => {
-    isDragging = false;
-});
-
-window.addEventListener("mousemove", (e) => {
-    if(!isDragging) return;
-
-    posX = e.clientX - startX;
-    posY = e.clientY - startY;
-
-    updateMap();
-});
+function closePopup(){
+    document.getElementById("popup").style.display="none";
+}
 
 /* WHEEL ZOOM */
 
-window.addEventListener("wheel", (e) => {
-
+window.addEventListener("wheel", e=>{
     e.preventDefault();
+    if(e.deltaY<0) scale+=0.1;
+    else scale=Math.max(0.2, scale-0.1);
+    update();
+},{passive:false});
 
-    scale += e.deltaY < 0 ? 0.1 : -0.1;
-
-    scale = Math.max(0.2, scale);
-
-    updateMap();
-
-}, { passive:false });
-
-updateMap();
-
-function closePopup(){
-    popup.style.display = "none";
-}
+update();
 
 </script>
 
