@@ -65,17 +65,21 @@ body{
     cursor:grabbing;
 }
 
-/* MAP IMAGE */
+/* MAP WRAPPER */
 
-#map{
+#mapWrapper{
     position:absolute;
 
     top:50%;
     left:50%;
 
-    transform:translate(-50%, -50%) scale(1);
-
     transform-origin:center center;
+}
+
+/* MAP IMAGE */
+
+#map{
+    display:block;
 
     user-select:none;
     -webkit-user-drag:none;
@@ -83,6 +87,55 @@ body{
     max-width:none;
 
     width:1200px;
+}
+
+/* MAP MARKER */
+
+.marker{
+    position:absolute;
+
+    width:14px;
+    height:14px;
+
+    background:#00ff88;
+
+    border-radius:50%;
+
+    border:2px solid #b6ffd8;
+
+    box-shadow:
+        0 0 10px #00ff88,
+        0 0 20px #00ff88;
+
+    cursor:pointer;
+
+    transition:0.2s;
+}
+
+.marker:hover{
+    transform:scale(1.2);
+}
+
+/* POPUP */
+
+.popup{
+    position:absolute;
+
+    background:rgba(0,0,0,0.95);
+
+    border:1px solid #00ff88;
+
+    padding:10px 14px;
+
+    color:#00ff88;
+
+    white-space:nowrap;
+
+    display:none;
+
+    transform:translate(-50%, -120%);
+
+    box-shadow:0 0 10px rgba(0,255,136,0.4);
 }
 
 /* CONTROLS */
@@ -185,18 +238,39 @@ RETURN
     <h1>EXCLUSION ZONE MAPPING</h1>
 
     <p>
-        Interactive anomaly mapping interface.
+        Interactive terrain and anomaly mapping interface.
     </p>
 
 </div>
 
 <div class="map-container" id="mapContainer">
 
-    <img
-        src="https://operator.coolsquad.xyz/u/luBi56.png"
-        id="map"
-        draggable="false"
-    >
+    <div id="mapWrapper">
+
+        <img
+            src="https://operator.coolsquad.xyz/u/luBi56.png"
+            id="map"
+            draggable="false"
+        >
+
+        <!-- MARKER -->
+
+        <div
+            class="marker"
+            id="fobMarker"
+            style="
+                left:490px;
+                top:1218px;
+            "
+        >
+
+            <div class="popup" id="popup">
+                Placid Wakes FOB
+            </div>
+
+        </div>
+
+    </div>
 
 </div>
 
@@ -209,7 +283,7 @@ RETURN
 
 <script>
 
-const map = document.getElementById("map");
+const mapWrapper = document.getElementById("mapWrapper");
 const container = document.getElementById("mapContainer");
 
 let scale = 1;
@@ -225,11 +299,11 @@ let startY;
 
 function updateMap(){
 
-    map.style.transform =
+    mapWrapper.style.transform =
         `translate(calc(-50% + ${posX}px), calc(-50% + ${posY}px)) scale(${scale})`;
 }
 
-/* ZOOM */
+/* ZOOM BUTTONS */
 
 document.getElementById("zoomIn").onclick = () => {
 
@@ -249,7 +323,7 @@ document.getElementById("zoomOut").onclick = () => {
     updateMap();
 };
 
-/* MOUSE DRAG */
+/* DRAGGING */
 
 container.addEventListener("mousedown", (e) => {
 
@@ -296,6 +370,32 @@ window.addEventListener("wheel", (e) => {
     updateMap();
 
 }, { passive:false });
+
+/* MARKER POPUP */
+
+const marker = document.getElementById("fobMarker");
+const popup = document.getElementById("popup");
+
+marker.addEventListener("click", (e) => {
+
+    e.stopPropagation();
+
+    if(
+        popup.style.display === "block"
+    ){
+        popup.style.display = "none";
+    } else {
+        popup.style.display = "block";
+    }
+
+});
+
+/* CLOSE POPUP */
+
+window.addEventListener("click", () => {
+
+    popup.style.display = "none";
+});
 
 updateMap();
 
