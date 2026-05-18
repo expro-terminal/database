@@ -29,7 +29,7 @@ body{overflow:hidden;background:black;color:#00ff88;}
 #map{display:block;width:1127px;height:1289px;user-select:none;pointer-events:none;}
 
 #gridCanvas{
-    position:absolute;top:-5px;left:-5px;
+    position:absolute;top:0;left:0;
     pointer-events:none;z-index:5;
 }
 
@@ -42,7 +42,7 @@ body{overflow:hidden;background:black;color:#00ff88;}
     position:absolute;top:-18px;left:50%;
     transform:translateX(-50%);
     font-size:12px;white-space:nowrap;
-    color:#00ff88;
+    color:#00ff88;pointer-events:none;
 }
 
 .green{background:#00ff88;}
@@ -87,11 +87,10 @@ body{overflow:hidden;background:black;color:#00ff88;}
     display:none;
     position:fixed;
     pointer-events:none;
-    background:rgba(0,0,0,0.92);
+    background:rgba(0,0,0,0.85);
     border:1px solid #00ff88;
-    padding:5px 10px;
+    padding:4px 10px;
     font-size:12px;
-    font-family:"Courier New",monospace;
     color:#00ff88;
     z-index:5000;
     white-space:nowrap;
@@ -166,127 +165,128 @@ body{overflow:hidden;background:black;color:#00ff88;}
 
 <div class="controls">
     <button onclick="zoomIn()">+</button>
-    <button onclick="zoomOut()">-</button>
+    <button onclick="zoomOut()">−</button>
 </div>
 
 <script>
 const world     = document.getElementById("mapWorld");
 const container = document.getElementById("mapContainer");
-const mapImg    = document.getElementById("map");
 const canvas    = document.getElementById("gridCanvas");
 const ctx       = canvas.getContext("2d");
 const tip       = document.getElementById("cursorTip");
 const tipPx     = document.getElementById("tipPx");
 const tipGrid   = document.getElementById("tipGrid");
 
-const COLS = 21;
-const ROWS = 24;
+const MAP_W   = 1127;
+const MAP_H   = 1289;
+const COLS    = 21;
+const ROWS    = 24;
 const LETTERS = "ABCDEFGHIJKLMNOPQRSTU";
-
-let scale = 1, x = 0, y = 0;
-let mapW = 1127, mapH = 1289;
+const CELL_W  = MAP_W / COLS;
+const CELL_H  = MAP_H / ROWS;
 
 function drawGrid(){
-    if(!mapH) return;
-    const cW = mapW / COLS;
-    const cH = mapH / ROWS;
-    canvas.width  = mapW;
-    canvas.height = mapH;
-    ctx.clearRect(0, 0, mapW, mapH);
+    canvas.width  = MAP_W;
+    canvas.height = MAP_H;
+    ctx.clearRect(0, 0, MAP_W, MAP_H);
 
-    // grid lines
     ctx.strokeStyle = "rgba(0,255,136,0.15)";
-    ctx.lineWidth = 1;
-    for(let c = 0; c <= COLS; c++){
-        ctx.beginPath(); ctx.moveTo(c*cW, 0); ctx.lineTo(c*cW, mapH); ctx.stroke();
+    ctx.lineWidth   = 0.5;
+    for(let c = 1; c < COLS; c++){
+        ctx.beginPath();
+        ctx.moveTo(c * CELL_W, 0);
+        ctx.lineTo(c * CELL_W, MAP_H);
+        ctx.stroke();
     }
-    for(let r = 0; r <= ROWS; r++){
-        ctx.beginPath(); ctx.moveTo(0, r*cH); ctx.lineTo(mapW, r*cH); ctx.stroke();
+    for(let r = 1; r < ROWS; r++){
+        ctx.beginPath();
+        ctx.moveTo(0, r * CELL_H);
+        ctx.lineTo(MAP_W, r * CELL_H);
+        ctx.stroke();
     }
 
-    // labels
-    ctx.fillStyle = "rgba(0,255,136,0.5)";
-    ctx.font = "bold 11px 'Courier New',monospace";
-
-    // column letters (top of each cell)
-    ctx.textAlign = "center";
+    ctx.fillStyle    = "rgba(0,255,136,0.5)";
+    ctx.font         = "bold 10px 'Courier New',monospace";
+    ctx.textAlign    = "center";
     ctx.textBaseline = "top";
     for(let c = 0; c < COLS; c++){
-        ctx.fillText(LETTERS[c], c*cW + cW/2, 3);
+        ctx.fillText(LETTERS[c], c * CELL_W + CELL_W / 2, 3);
     }
 
-    // row numbers (left of each cell)
-    ctx.textAlign = "left";
+    ctx.textAlign    = "left";
     ctx.textBaseline = "middle";
     for(let r = 0; r < ROWS; r++){
-        ctx.fillText(String(r+1), 3, r*cH + cH/2);
+        ctx.fillText(String(r + 1), 3, r * CELL_H + CELL_H / 2);
     }
 }
 
-function initGrid(){
-    mapW = 1127;
-    mapH = 1289;
-    drawGrid();
-}
+drawGrid();
 
-mapImg.addEventListener("load", initGrid);
-initGrid();
-
-/* DRAG */
+let scale = 1, x = 0, y = 0;
 let dragging = false, sx, sy;
-container.addEventListener("mousedown", e=>{ dragging=true; sx=e.clientX-x; sy=e.clientY-y; });
-window.addEventListener("mouseup", ()=> dragging=false);
-window.addEventListener("mousemove", e=>{
-    if(dragging){ x=e.clientX-sx; y=e.clientY-sy; update(); }
+
+container.addEventListener("mousedown", e => {
+    dragging = true;
+    sx = e.clientX - x;
+    sy = e.clientY - y;
+});
+window.addEventListener("mouseup",   () => dragging = false);
+window.addEventListener("mousemove", e => {
+    if(dragging){ x = e.clientX - sx; y = e.clientY - sy; update(); }
     moveTip(e);
 });
 
-/* ZOOM */
-function zoomIn(){ scale=Math.min(4,+(scale+0.1).toFixed(2)); update(); }
-function zoomOut(){ scale=Math.max(0.2,+(scale-0.1).toFixed(2)); update(); }
-function update(){ world.style.transform=`translate(${x}px,${y}px) scale(${scale})`; }
-window.addEventListener("wheel", e=>{
-    e.preventDefault();
-    scale = e.deltaY<0 ? Math.min(4,+(scale+0.1).toFixed(2)) : Math.max(0.2,+(scale-0.1).toFixed(2));
+function zoomAt(ns, cx, cy){
+    ns = Math.min(5, Math.max(0.2, +ns.toFixed(2)));
+    x  = cx - (cx - x) * (ns / scale);
+    y  = cy - (cy - y) * (ns / scale);
+    scale = ns;
     update();
-},{passive:false});
+}
+function zoomIn()  { zoomAt(scale + 0.1, window.innerWidth / 2, window.innerHeight / 2); }
+function zoomOut() { zoomAt(scale - 0.1, window.innerWidth / 2, window.innerHeight / 2); }
+function update()  { world.style.transform = `translate(${x}px,${y}px) scale(${scale})`; }
 
-/* CURSOR TOOLTIP */
-container.addEventListener("mouseenter", ()=> tip.style.display="block");
-container.addEventListener("mouseleave", ()=> tip.style.display="none");
+window.addEventListener("wheel", e => {
+    e.preventDefault();
+    zoomAt(e.deltaY < 0 ? scale + 0.1 : scale - 0.1, e.clientX, e.clientY);
+}, { passive: false });
+
+container.addEventListener("mouseenter", () => tip.style.display = "block");
+container.addEventListener("mouseleave", () => tip.style.display = "none");
 
 function moveTip(e){
     const mx = Math.round((e.clientX - x) / scale);
     const my = Math.round((e.clientY - y) / scale);
 
-    const cW = mapW / COLS;
-    const cH = (mapH||1) / ROWS;
-    const col = Math.floor(mx / cW);
-    const row = Math.floor(my / cH);
-    const letter = (col>=0 && col<COLS) ? LETTERS[col] : "-";
-    const num    = (row>=0 && row<ROWS) ? (row+1) : "-";
+    const col    = Math.floor(mx / CELL_W);
+    const row    = Math.floor(my / CELL_H);
+    const letter = (col >= 0 && col < COLS) ? LETTERS[col] : "-";
+    const num    = (row >= 0 && row < ROWS) ? String(row + 1) : "-";
 
     tipPx.textContent   = "X:" + mx + "  Y:" + my;
     tipGrid.textContent = "GRID: " + letter + num;
 
-    let tx = e.clientX + 18;
-    let ty = e.clientY + 18;
-    if(tx + tip.offsetWidth  > window.innerWidth)  tx = e.clientX - tip.offsetWidth  - 8;
-    if(ty + tip.offsetHeight > window.innerHeight) ty = e.clientY - tip.offsetHeight - 8;
-    tip.style.left = tx+"px";
-    tip.style.top  = ty+"px";
+    const off = 16;
+    let tx = e.clientX + off;
+    let ty = e.clientY + off;
+    if(tx + tip.offsetWidth  > window.innerWidth)  tx = e.clientX - tip.offsetWidth  - off;
+    if(ty + tip.offsetHeight > window.innerHeight) ty = e.clientY - tip.offsetHeight - off;
+    tip.style.left = tx + "px";
+    tip.style.top  = ty + "px";
 }
 
-/* POPUP */
-function openPopup(title,img,link){
-    document.getElementById("popup").style.display="block";
-    document.getElementById("popupTitle").innerText=title;
-    const image=document.getElementById("popupImg");
-    const linkEl=document.getElementById("popupLink");
-    if(img){image.src=img;image.style.display="block";}else{image.style.display="none";}
-    if(link){linkEl.href=link;linkEl.innerText="OPEN FILE";linkEl.style.display="block";}else{linkEl.style.display="none";}
+function openPopup(title, img, link){
+    document.getElementById("popup").style.display = "block";
+    document.getElementById("popupTitle").innerText = title;
+    const image  = document.getElementById("popupImg");
+    const linkEl = document.getElementById("popupLink");
+    if(img){  image.src = img;    image.style.display = "block"; }
+    else {                        image.style.display = "none";  }
+    if(link){ linkEl.href = link; linkEl.innerText = "OPEN FILE"; linkEl.style.display = "block"; }
+    else {                                                         linkEl.style.display = "none";  }
 }
-function closePopup(){ document.getElementById("popup").style.display="none"; }
+function closePopup(){ document.getElementById("popup").style.display = "none"; }
 
 update();
 </script>
