@@ -26,25 +26,16 @@ body{
     top:0;
     left:0;
     width:100%;
-    padding:15px 20px;
+    padding:15px;
     border-bottom:1px solid #00ff88;
     background:rgba(0,0,0,0.9);
     z-index:1000;
     color:#00ff88;
 }
 
-.topbar h1{
-    font-size:22px;
-}
+/* VIEWPORT */
 
-.topbar p{
-    font-size:13px;
-    color:#7dffb2;
-}
-
-/* MAP */
-
-.map-container{
+#viewport{
     width:100vw;
     height:100vh;
     overflow:hidden;
@@ -52,30 +43,24 @@ body{
     cursor:grab;
 }
 
-.map-container:active{
+#viewport:active{
     cursor:grabbing;
 }
 
-#map{
-    position:absolute;
-    top:50%;
-    left:50%;
-    transform-origin:0 0;
-    user-select:none;
-    -webkit-user-drag:none;
-    width:1200px;
-}
+/* WORLD (THIS IS THE IMPORTANT FIX) */
 
-/* MARKERS LAYER */
-
-#markerLayer{
+#world{
     position:absolute;
     top:0;
     left:0;
-    width:1200px;
-    height:auto;
-    pointer-events:none;
     transform-origin:0 0;
+}
+
+/* MAP */
+
+#map{
+    width:1200px;
+    display:block;
 }
 
 /* MARKERS */
@@ -83,7 +68,6 @@ body{
 .marker{
     position:absolute;
     transform:translate(-50%, -50%);
-    pointer-events:auto;
     cursor:pointer;
 }
 
@@ -91,27 +75,25 @@ body{
     width:10px;
     height:10px;
     border-radius:50%;
-    border:1px solid white;
-    box-shadow:0 0 8px currentColor;
 }
 
 .label{
     position:absolute;
-    transform:translate(-50%, -130%);
-    white-space:nowrap;
+    transform:translate(-50%, -140%);
     font-size:12px;
+    white-space:nowrap;
     color:#00ff88;
     text-shadow:0 0 5px black;
 }
 
 /* COLORS */
 
-.green{ background:#00ff88; color:#00ff88; }
-.red{ background:#ff3b3b; color:#ff3b3b; }
-.yellow{ background:#ffd000; color:#ffd000; }
-.black{ background:#222; color:#888; }
-.brown{ background:#8b5a2b; color:#8b5a2b; }
-.white{ background:#e6e6e6; color:#e6e6e6; }
+.green{ background:#00ff88; }
+.red{ background:#ff3b3b; }
+.yellow{ background:#ffd000; }
+.black{ background:#222; }
+.brown{ background:#8b5a2b; }
+.white{ background:#e6e6e6; }
 
 /* POPUP */
 
@@ -124,9 +106,9 @@ body{
     border:1px solid #00ff88;
     padding:20px;
     width:320px;
-    color:#00ff88;
-    z-index:2000;
     display:none;
+    z-index:2000;
+    color:#00ff88;
 }
 
 .popup img{
@@ -139,12 +121,6 @@ body{
     color:#6ed6ff;
     display:block;
     margin-top:10px;
-}
-
-.close{
-    float:right;
-    cursor:pointer;
-    color:red;
 }
 
 /* CONTROLS */
@@ -160,24 +136,10 @@ body{
     width:45px;
     height:45px;
     margin:5px;
+    border:1px solid #00ff88;
     background:black;
-    border:1px solid #00ff88;
     color:#00ff88;
-    font-size:20px;
     cursor:pointer;
-}
-
-/* BACK */
-
-.back{
-    position:fixed;
-    top:15px;
-    right:15px;
-    z-index:1000;
-    border:1px solid #00ff88;
-    padding:8px 12px;
-    color:#00ff88;
-    text-decoration:none;
 }
 
 </style>
@@ -186,35 +148,33 @@ body{
 <body>
 
 <div class="topbar">
-    <h1>EXCLUSION ZONE MAPPING</h1>
-    <p>Interactive anomaly tracking grid</p>
+    EXCLUSION ZONE MAPPING
 </div>
 
-<a class="back" href="index.html">RETURN</a>
+<div id="viewport">
 
-<div class="map-container" id="container">
+    <div id="world">
 
-    <img src="https://operator.coolsquad.xyz/u/luBi56.png" id="map">
+        <img id="map" src="https://operator.coolsquad.xyz/u/luBi56.png">
 
-    <div id="markerLayer"></div>
+        <div id="markers"></div>
+
+    </div>
 
 </div>
 
 <div class="controls">
-    <button id="in">+</button>
-    <button id="out">−</button>
+    <button onclick="zoomIn()">+</button>
+    <button onclick="zoomOut()">−</button>
 </div>
 
-<div class="popup" id="popup">
-    <span class="close" onclick="closePopup()">X</span>
-    <div id="popupContent"></div>
-</div>
+<div class="popup" id="popup"></div>
 
 <script>
 
-const map = document.getElementById("map");
-const layer = document.getElementById("markerLayer");
-const container = document.getElementById("container");
+const world = document.getElementById("world");
+const viewport = document.getElementById("viewport");
+const markerLayer = document.getElementById("markers");
 
 let scale = 1;
 let x = 0;
@@ -223,11 +183,7 @@ let y = 0;
 let dragging = false;
 let startX, startY;
 
-/* MAP SIZE (IMPORTANT FOR COORDINATES) */
-const MAP_W = 1200;
-const MAP_H = 1400;
-
-/* MARKERS DATA */
+/* MARKERS */
 
 const markers = [
 
@@ -258,11 +214,11 @@ const markers = [
 
 ];
 
-/* RENDER MARKERS */
+/* BUILD MARKERS */
 
-function renderMarkers(){
+function buildMarkers(){
 
-    layer.innerHTML = "";
+    markerLayer.innerHTML = "";
 
     markers.forEach(m => {
 
@@ -294,38 +250,37 @@ function renderMarkers(){
                 html += `<a href="${m.link}">Open File</a>`;
             }
 
-            openPopup(html);
+            document.getElementById("popup").innerHTML = html;
+            document.getElementById("popup").style.display = "block";
         };
 
-        layer.appendChild(el);
+        markerLayer.appendChild(el);
     });
-}
-
-/* POPUP */
-
-function openPopup(html){
-    document.getElementById("popupContent").innerHTML = html;
-    document.getElementById("popup").style.display = "block";
-}
-
-function closePopup(){
-    document.getElementById("popup").style.display = "none";
 }
 
 /* TRANSFORM */
 
 function update(){
 
-    const transform =
+    world.style.transform =
         `translate(${x}px, ${y}px) scale(${scale})`;
+}
 
-    map.style.transform = transform;
-    layer.style.transform = transform;
+/* ZOOM */
+
+function zoomIn(){
+    scale += 0.1;
+    update();
+}
+
+function zoomOut(){
+    scale = Math.max(0.2, scale - 0.1);
+    update();
 }
 
 /* DRAG */
 
-container.addEventListener("mousedown", e => {
+viewport.addEventListener("mousedown", e => {
     dragging = true;
     startX = e.clientX - x;
     startY = e.clientY - y;
@@ -334,6 +289,7 @@ container.addEventListener("mousedown", e => {
 window.addEventListener("mouseup", () => dragging = false);
 
 window.addEventListener("mousemove", e => {
+
     if(!dragging) return;
 
     x = e.clientX - startX;
@@ -342,26 +298,18 @@ window.addEventListener("mousemove", e => {
     update();
 });
 
-/* ZOOM */
+/* CLOSE POPUP */
 
-document.getElementById("in").onclick = () => {
-    scale += 0.1;
-    update();
-};
+window.addEventListener("click", e => {
+    if(e.target.id === "popup"){
+        document.getElementById("popup").style.display = "none";
+    }
+});
 
-document.getElementById("out").onclick = () => {
-    scale = Math.max(0.2, scale - 0.1);
-    update();
-};
-
-renderMarkers();
+buildMarkers();
 update();
 
 </script>
-
-<div class="popup" id="popup">
-    <div id="popupContent"></div>
-</div>
 
 </body>
 </html>
