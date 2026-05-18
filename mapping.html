@@ -23,10 +23,10 @@ body{overflow:hidden;background:black;color:#00ff88;}
 
 #mapWorld{
     position:absolute;top:0;left:0;
-    width:1158px;transform-origin:0 0;
+    width:1127px;transform-origin:0 0;
 }
 
-#map{display:block;width:1158px;height:1320px;user-select:none;pointer-events:none;}
+#map{display:block;width:1127px;height:1289px;user-select:none;pointer-events:none;}
 
 #gridCanvas{
     position:absolute;top:0;left:0;
@@ -110,7 +110,7 @@ body{overflow:hidden;background:black;color:#00ff88;}
 
 <div class="map-container" id="mapContainer">
     <div id="mapWorld">
-        <img src="https://operator.coolsquad.xyz/u/luBi56.png" id="map">
+        <img src="https://operator.coolsquad.xyz/u/tFQL4R.png" id="map">
         <canvas id="gridCanvas"></canvas>
 
         <div class="marker green" style="top:1218px;left:496px;" onclick="openPopup('Placid Wakes FOB')">
@@ -184,7 +184,7 @@ const ROWS = 24;
 const LETTERS = "ABCDEFGHIJKLMNOPQRSTU";
 
 let scale = 1, x = 0, y = 0;
-let mapW = 1158, mapH = 1320;
+let mapW = 1127, mapH = 1289;
 
 function drawGrid(){
     if(!mapH) return;
@@ -224,8 +224,8 @@ function drawGrid(){
 }
 
 function initGrid(){
-    mapW = 1158;
-    mapH = 1320;
+    mapW = 1127;
+    mapH = 1289;
     drawGrid();
 }
 
