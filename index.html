@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>PROJECT DARKSTATE</title>
 
 <style>
@@ -24,16 +24,16 @@ body{
 .bg-image{
     position:fixed;
     inset:0;
-    background:
-        url('https://operator.coolsquad.xyz/u/CBkG4n.png')
-        center center / 500px auto no-repeat;
+    background:url('https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?q=80&w=1974&auto=format&fit=crop')
+    center center / 35% no-repeat;
     opacity:0;
     transition:opacity 1s ease;
     z-index:-3;
+    filter:brightness(0.8);
 }
 
 .bg-image.active{
-    opacity:0.07;
+    opacity:0.10;
 }
 
 /* SCANLINES */
@@ -44,21 +44,22 @@ body{
     z-index:-1;
 
     background:
-        repeating-linear-gradient(
-            to bottom,
-            rgba(255,255,255,0.03),
-            rgba(255,255,255,0.03) 1px,
-            transparent 1px,
-            transparent 3px
-        );
+    repeating-linear-gradient(
+        to bottom,
+        rgba(255,255,255,0.03),
+        rgba(255,255,255,0.03) 1px,
+        transparent 1px,
+        transparent 3px
+    );
 
-    animation:scanMove 7s linear infinite;
+    animation:scanMove 8s linear infinite;
 }
 
 @keyframes scanMove{
     from{
         background-position:0 0;
     }
+
     to{
         background-position:0 100px;
     }
@@ -66,17 +67,17 @@ body{
 
 /* TERMINAL */
 .terminal{
+    height:100vh;
     display:flex;
     flex-direction:column;
     justify-content:space-between;
-    height:100vh;
     padding:20px;
 }
 
 .output{
     overflow-y:auto;
-    white-space:pre-wrap;
     padding-bottom:20px;
+    white-space:pre-wrap;
 }
 
 .line{
@@ -84,29 +85,28 @@ body{
 }
 
 .system{
-    color:#88ffcc;
+    color:#7dffb5;
 }
 
 .error{
-    color:#ff5555;
+    color:#ff5c5c;
 }
 
 .success{
-    color:#7dff7d;
+    color:#76ff76;
 }
 
 .database-link{
     display:block;
-    color:#6ecfff;
-    margin-top:6px;
+    color:#6ed6ff;
     text-decoration:none;
+    margin-top:6px;
 }
 
 .database-link:hover{
     text-decoration:underline;
 }
 
-/* TOP INFO */
 .top-info{
     margin-bottom:20px;
 }
@@ -118,16 +118,15 @@ body{
 }
 
 .subtitle{
-    color:#85ffbe;
-    margin-bottom:5px;
+    margin-bottom:8px;
+    color:#88ffc3;
 }
 
 .clock{
-    color:#73d0a3;
-    margin-top:8px;
+    color:#77dba6;
 }
 
-/* INPUT BAR */
+/* COMMAND BAR */
 .input-area{
     border-top:1px solid #00ff88;
     padding-top:12px;
@@ -137,7 +136,6 @@ body{
 }
 
 .prefix{
-    color:#00ff88;
     white-space:nowrap;
 }
 
@@ -164,6 +162,7 @@ body{
 }
 </style>
 </head>
+
 <body>
 
 <div class="bg-image" id="bgImage"></div>
@@ -174,13 +173,15 @@ body{
     <div class="output" id="output">
 
         <div class="top-info">
-            <div class="title">PROJECT DARKSTATE DATABASE</div>
+            <div class="title">
+                PROJECT DARKSTATE DATABASE
+            </div>
 
             <div class="subtitle" id="loginStatus">
                 You're logged in as "Guest"
             </div>
 
-            <div class="subtitle" id="researchText"></div>
+            <div class="subtitle" id="sectionText"></div>
 
             <div class="clock" id="clock"></div>
         </div>
@@ -190,20 +191,17 @@ body{
         </div>
 
         <div class="line">
-            Type "help" to begin.
+            Type "help" for available commands.
         </div>
 
     </div>
 
     <div class="input-area">
-        <span class="prefix" id="prefix">[ Guest@s80.host : ~ ]</span>
+        <span class="prefix" id="prefix">
+            [ Guest@s80.host : ~ ]
+        </span>
 
-        <input
-            type="text"
-            id="commandInput"
-            autocomplete="off"
-            autofocus
-        >
+        <input type="text" id="commandInput" autocomplete="off" autofocus />
 
         <div class="cursor"></div>
     </div>
@@ -215,28 +213,21 @@ const output = document.getElementById("output");
 const input = document.getElementById("commandInput");
 const prefix = document.getElementById("prefix");
 const loginStatus = document.getElementById("loginStatus");
-const researchText = document.getElementById("researchText");
+const sectionText = document.getElementById("sectionText");
 const bgImage = document.getElementById("bgImage");
 
 let loggedIn = false;
 let username = "Guest";
-
-/* LOGIN STATES */
-let loginMode = false;
-let passwordMode = false;
-let tempUsername = "";
 
 /* CLOCK */
 function updateClock(){
 
     const now = new Date();
 
-    const formatted =
+    document.getElementById("clock").innerText =
         now.toLocaleDateString() +
         " | " +
         now.toLocaleTimeString();
-
-    document.getElementById("clock").innerText = formatted;
 }
 
 setInterval(updateClock, 1000);
@@ -248,7 +239,6 @@ function addLine(text, className=""){
     const div = document.createElement("div");
 
     div.className = "line " + className;
-
     div.innerHTML = text;
 
     output.appendChild(div);
@@ -259,22 +249,21 @@ function addLine(text, className=""){
 /* UI UPDATE */
 function updateUI(){
 
-    prefix.textContent =
-        `[ ${username}@s80.host : ~ ]`;
+    prefix.textContent = `[ ${username}@s80.host : ~ ]`;
 
     loginStatus.innerHTML =
         `You're logged in as "${username}"`;
 
     if(loggedIn){
 
-        researchText.innerHTML =
+        sectionText.innerHTML =
             "Expeditionary Projects - Research Section";
 
         bgImage.classList.add("active");
 
     } else {
 
-        researchText.innerHTML = "";
+        sectionText.innerHTML = "";
 
         bgImage.classList.remove("active");
     }
@@ -288,7 +277,10 @@ function showHelp(){
         addLine(`
 Available Commands:
 - help
-- login
+- login USERNAME PASSWORD
+
+Example:
+login EP1EXPROEXL fatchud123
         `, "system");
 
     } else {
@@ -305,182 +297,138 @@ Available Commands:
 /* DATABASE */
 function showDatabase(){
 
-    addLine(
-        "ACCESSING ARTIFACT DATABASE...",
-        "success"
-    );
+    addLine("OPENING ARTIFACT DATABASE...", "success");
 
-    const links = [
-
+    const artifacts = [
         {
-            name:"Artifact 001 - The Monolith",
+            title:"Artifact 001 - The Hollow Signal",
             page:"artifact-001.html"
         },
-
         {
-            name:"Artifact 002 - Special Roots",
+            title:"Artifact 002 - Blacksite Echo",
             page:"artifact-002.html"
         },
-
         {
-            name:"Artifact 003 - The Church",
+            title:"Artifact 003 - Janus Protocol",
             page:"artifact-003.html"
-        },
-
-        {
-            name:"Artifact 004 - Special Roots",
-            page:"artifact-004.html"
-        },
-        
-         {
-            name:"Artifact 005 - Red Box",
-            page:"artifact-005.html"
         }
     ];
 
-    links.forEach(link => {
+    artifacts.forEach(artifact => {
 
         addLine(`
-            <a class="database-link" href="${link.page}">
-                ${link.name}
-            </a>
+<a class="database-link" href="${artifact.page}">
+${artifact.title}
+</a>
         `);
     });
 }
 
-/* COMMAND INPUT */
+/* COMMANDS */
 input.addEventListener("keydown", function(e){
 
-    if(e.key !== "Enter") return;
+    if(e.key === "Enter"){
 
-    const command = input.value.trim();
+        const command = input.value.trim();
 
-    addLine(
-        `<span style="color:#00ff88">${prefix.textContent}</span> ${command}`
-    );
+        addLine(`
+<span style="color:#00ff88">${prefix.textContent}</span> ${command}
+        `);
 
-    /* LOGIN USERNAME STEP */
-    if(loginMode){
+        const parts = command.split(" ");
+        const base = parts[0]?.toLowerCase();
 
-        tempUsername = command;
+        /* BEFORE LOGIN */
+        if(!loggedIn){
 
-        loginMode = false;
-        passwordMode = true;
+            switch(base){
 
-        addLine("ENTER PASSWORD:", "system");
+                case "help":
+                    showHelp();
+                    break;
 
-        input.value = "";
-        return;
-    }
+                case "login":
 
-    /* PASSWORD STEP */
-    if(passwordMode){
+                    const user = parts[1];
+                    const pass = parts[2];
 
-        passwordMode = false;
+                    if(
+                        user === "EP1EXPROEXL" &&
+                        pass === "fatchud123"
+                    ){
 
-        const enteredPassword = command;
+                        loggedIn = true;
+                        username = user;
 
-        if(
-            tempUsername === "EXPROEXL3" &&
-            enteredPassword === "fatchud123"
-        ){
+                        updateUI();
 
-            loggedIn = true;
-            username = tempUsername;
+                        addLine(
+                            "AUTHENTICATION SUCCESSFUL",
+                            "success"
+                        );
 
-            updateUI();
+                        addLine(
+                            "ACCESS GRANTED",
+                            "success"
+                        );
 
-            addLine(
-                "AUTHENTICATION SUCCESSFUL",
-                "success"
-            );
+                    } else {
 
-            addLine(
-                "ACCESS GRANTED",
-                "success"
-            );
+                        addLine(
+                            "INVALID CREDENTIALS",
+                            "error"
+                        );
+                    }
 
-        } else {
+                    break;
 
-            addLine(
-                "ACCESS DENIED",
-                "error"
-            );
+                default:
+
+                    addLine(
+                        "UNKNOWN COMMAND",
+                        "error"
+                    );
+            }
+        }
+
+        /* AFTER LOGIN */
+        else {
+
+            switch(base){
+
+                case "help":
+                    showHelp();
+                    break;
+
+                case "logout":
+
+                    loggedIn = false;
+                    username = "Guest";
+
+                    updateUI();
+
+                    addLine(
+                        "SESSION TERMINATED",
+                        "error"
+                    );
+
+                    break;
+
+                case "database":
+                    showDatabase();
+                    break;
+
+                default:
+
+                    addLine(
+                        "UNKNOWN COMMAND",
+                        "error"
+                    );
+            }
         }
 
         input.value = "";
-        return;
     }
-
-    const lower = command.toLowerCase();
-
-    /* BEFORE LOGIN */
-    if(!loggedIn){
-
-        switch(lower){
-
-            case "help":
-                showHelp();
-                break;
-
-            case "login":
-
-                loginMode = true;
-
-                addLine(
-                    "ENTER USERNAME:",
-                    "system"
-                );
-
-                break;
-
-            default:
-
-                addLine(
-                    "UNKNOWN COMMAND",
-                    "error"
-                );
-        }
-
-    }
-
-    /* AFTER LOGIN */
-    else {
-
-        switch(lower){
-
-            case "help":
-                showHelp();
-                break;
-
-            case "logout":
-
-                loggedIn = false;
-                username = "Guest";
-
-                updateUI();
-
-                addLine(
-                    "SESSION TERMINATED",
-                    "error"
-                );
-
-                break;
-
-            case "database":
-                showDatabase();
-                break;
-
-            default:
-
-                addLine(
-                    "UNKNOWN COMMAND",
-                    "error"
-                );
-        }
-    }
-
-    input.value = "";
 });
 
 updateUI();
