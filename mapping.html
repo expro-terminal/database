@@ -48,7 +48,33 @@ body{
     font-size:14px;
 }
 
-/* MAP CONTAINER */
+/* RETURN BUTTON */
+
+.back{
+    position:fixed;
+
+    top:20px;
+    right:20px;
+
+    color:#00ff88;
+
+    text-decoration:none;
+
+    border:1px solid #00ff88;
+
+    padding:10px 15px;
+
+    z-index:2000;
+
+    transition:0.2s;
+}
+
+.back:hover{
+    background:#00ff88;
+    color:black;
+}
+
+/* MAP AREA */
 
 .map-container{
     width:100vw;
@@ -73,7 +99,10 @@ body{
     top:50%;
     left:50%;
 
-    transform:translate(-50%, -50%) scale(1);
+    transform:
+        translate(-50%, -50%)
+        scale(1);
+
     transform-origin:center center;
 }
 
@@ -97,40 +126,36 @@ body{
 
     border-radius:50%;
 
-    cursor:pointer;
-
     transform:translate(-50%, -50%);
 
-    border:1px solid white;
+    cursor:pointer;
 
-    z-index:50;
+    z-index:100;
 }
 
-/* TITLE */
+/* LABELS */
 
 .marker-label{
     position:absolute;
 
-    bottom:18px;
+    top:-22px;
     left:50%;
 
     transform:translateX(-50%);
 
-    white-space:nowrap;
-
     font-size:12px;
 
-    color:white;
+    white-space:nowrap;
 
-    text-shadow:0 0 6px black;
+    text-shadow:0 0 5px black;
 }
 
 /* COLORS */
 
 .green{ background:#00ff88; }
-.red{ background:#ff3333; }
-.yellow{ background:#ffd000; }
-.black{ background:#000; border:1px solid #888; }
+.red{ background:#ff2e2e; }
+.yellow{ background:#ffe600; }
+.black{ background:#111; border:1px solid #666; }
 .white{ background:white; }
 
 /* POPUP */
@@ -143,21 +168,20 @@ body{
 
     transform:translate(-50%, -50%);
 
+    width:400px;
+    max-width:90vw;
+
     background:#050505;
 
     border:1px solid #00ff88;
 
     padding:20px;
 
-    width:400px;
-
-    max-width:90vw;
-
     z-index:5000;
 
     display:none;
 
-    box-shadow:0 0 25px rgba(0,255,136,0.2);
+    box-shadow:0 0 20px rgba(0,255,136,0.3);
 }
 
 .popup h2{
@@ -166,8 +190,8 @@ body{
 
 .popup img{
     width:100%;
-    margin-top:15px;
     border:1px solid #00ff88;
+    margin-bottom:15px;
 }
 
 .popup a{
@@ -177,18 +201,17 @@ body{
 .close-btn{
     margin-top:20px;
 
-    padding:10px 15px;
-
     background:black;
+    color:#00ff88;
 
     border:1px solid #00ff88;
 
-    color:#00ff88;
+    padding:10px 15px;
 
     cursor:pointer;
 }
 
-/* CONTROLS */
+/* ZOOM BUTTONS */
 
 .controls{
     position:fixed;
@@ -201,41 +224,22 @@ body{
 
     gap:10px;
 
-    z-index:1000;
+    z-index:2000;
 }
 
 .controls button{
     width:50px;
     height:50px;
 
-    border:1px solid #00ff88;
-
     background:black;
 
     color:#00ff88;
 
+    border:1px solid #00ff88;
+
     font-size:24px;
 
     cursor:pointer;
-}
-
-/* RETURN */
-
-.back{
-    position:fixed;
-
-    top:20px;
-    right:20px;
-
-    color:#00ff88;
-
-    text-decoration:none;
-
-    border:1px solid #00ff88;
-
-    padding:10px 15px;
-
-    z-index:1001;
 }
 
 /* SCANLINES */
@@ -255,7 +259,7 @@ body{
         transparent 3px
     );
 
-    z-index:9999;
+    z-index:10000;
 }
 
 </style>
@@ -291,102 +295,102 @@ RETURN
 
         <!-- PLACID WAKES FOB -->
 
-        <div class="marker green"
-             style="left:490px; top:1250px;"
-             onclick="openPopup('Placid Wakes FOB')">
-
+        <div
+            class="marker green"
+            style="left:496px; top:1218px;"
+            onclick="openPopup('Placid Wakes FOB')"
+        >
             <div class="marker-label">
                 Placid Wakes FOB
             </div>
-
         </div>
 
         <!-- RED BOX -->
 
-        <div class="marker red"
-             style="left:592px; top:1230px;"
-             onclick="openPopup(
+        <div
+            class="marker red"
+            style="left:592px; top:1230px;"
+            onclick="openPopup(
                 'Red Box',
                 'https://operator.coolsquad.xyz/u/RIghwK.png',
                 'artifact-001.html'
-             )">
-
+            )"
+        >
             <div class="marker-label">
                 Red Box
             </div>
-
         </div>
 
         <!-- MONOLITH -->
 
-        <div class="marker red"
-             style="left:550px; top:410px;"
-             onclick="openPopup(
+        <div
+            class="marker red"
+            style="left:550px; top:410px;"
+            onclick="openPopup(
                 'The Monolith',
                 'https://operator.coolsquad.xyz/u/mH30lg.png',
                 'artifact-003.html'
-             )">
-
+            )"
+        >
             <div class="marker-label">
                 The Monolith
             </div>
-
         </div>
 
         <!-- CHURCH -->
 
-        <div class="marker yellow"
-             style="left:690px; top:775px;"
-             onclick="openPopup('The Church')">
-
+        <div
+            class="marker yellow"
+            style="left:690px; top:775px;"
+            onclick="openPopup('The Church')"
+        >
             <div class="marker-label">
                 The Church
             </div>
-
         </div>
 
         <!-- BLACK PRISM -->
 
-        <div class="marker black"
-             style="left:750px; top:550px;"
-             onclick="openPopup('Black Prism')">
-
+        <div
+            class="marker black"
+            style="left:750px; top:550px;"
+            onclick="openPopup('Black Prism')"
+        >
             <div class="marker-label">
                 Black Prism
             </div>
-
         </div>
 
         <!-- NEWTONS TRIANGLE -->
 
-        <div class="marker white"
-             style="left:824px; top:725px;"
-             onclick="openPopup('Newtons Triangle')">
-
+        <div
+            class="marker white"
+            style="left:824px; top:725px;"
+            onclick="openPopup('Newtons Triangle')"
+        >
             <div class="marker-label">
                 Newtons Triangle
             </div>
-
         </div>
 
-        <div class="marker white"
-             style="left:760px; top:675px;"
-             onclick="openPopup('Newtons Triangle')">
-
+        <div
+            class="marker white"
+            style="left:760px; top:675px;"
+            onclick="openPopup('Newtons Triangle')"
+        >
             <div class="marker-label">
                 Newtons Triangle
             </div>
-
         </div>
 
-        <div class="marker white"
-             style="left:739px; top:713px;"
-             onclick="openPopup('Newtons Triangle')">
-
+        <div
+            class="marker white"
+            style="left:739px; top:713px;"
+            onclick="openPopup('Newtons Triangle')"
+        >
             <div class="marker-label">
                 Newtons Triangle
             </div>
-
         </div>
 
     </div>
@@ -399,7 +403,9 @@ RETURN
 
     <h2 id="popupTitle"></h2>
 
-    <div id="popupContent"></div>
+    <img id="popupImage" style="display:none;">
+
+    <div id="popupLink"></div>
 
     <button class="close-btn" onclick="closePopup()">
         CLOSE
@@ -418,23 +424,23 @@ RETURN
 
 <script>
 
-/* MAP CONTROLS */
-
-const mapWrapper = document.getElementById("mapWrapper");
+const wrapper = document.getElementById("mapWrapper");
 const container = document.getElementById("mapContainer");
 
 let scale = 1;
 let posX = 0;
 let posY = 0;
 
-let isDragging = false;
+let dragging = false;
 
 let startX;
 let startY;
 
+/* UPDATE MAP */
+
 function updateMap(){
 
-    mapWrapper.style.transform =
+    wrapper.style.transform =
         `translate(calc(-50% + ${posX}px), calc(-50% + ${posY}px)) scale(${scale})`;
 }
 
@@ -458,11 +464,11 @@ document.getElementById("zoomOut").onclick = () => {
     updateMap();
 };
 
-/* DRAG */
+/* DRAGGING */
 
 container.addEventListener("mousedown", (e) => {
 
-    isDragging = true;
+    dragging = true;
 
     startX = e.clientX - posX;
     startY = e.clientY - posY;
@@ -470,12 +476,12 @@ container.addEventListener("mousedown", (e) => {
 
 window.addEventListener("mouseup", () => {
 
-    isDragging = false;
+    dragging = false;
 });
 
 window.addEventListener("mousemove", (e) => {
 
-    if(!isDragging) return;
+    if(!dragging) return;
 
     posX = e.clientX - startX;
     posY = e.clientY - startY;
@@ -506,44 +512,47 @@ window.addEventListener("wheel", (e) => {
 
 }, { passive:false });
 
-updateMap();
-
-/* POPUPS */
+/* POPUP */
 
 function openPopup(title, image=null, link=null){
 
-    const popup = document.getElementById("popup");
+    document.getElementById("popup").style.display = "block";
 
     document.getElementById("popupTitle").innerText = title;
 
-    let html = "";
+    const img = document.getElementById("popupImage");
 
     if(image){
 
-        html += `
-        <img src="${image}">
-        `;
+        img.src = image;
+        img.style.display = "block";
+
+    } else {
+
+        img.style.display = "none";
     }
+
+    const popupLink = document.getElementById("popupLink");
 
     if(link){
 
-        html += `
-        <br><br>
-        <a href="${link}">
+        popupLink.innerHTML =
+        `<br><a href="${link}">
             Open Artifact File
-        </a>
-        `;
+        </a>`;
+
+    } else {
+
+        popupLink.innerHTML = "";
     }
-
-    document.getElementById("popupContent").innerHTML = html;
-
-    popup.style.display = "block";
 }
 
 function closePopup(){
 
     document.getElementById("popup").style.display = "none";
 }
+
+updateMap();
 
 </script>
 
