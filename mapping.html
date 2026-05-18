@@ -51,6 +51,22 @@ body{ overflow:hidden; background:black; color:#00ff88; }
 .brown  { background:#8b5a2b; }
 .white  { background:#fff; }
 
+/* popup anchored next to marker in map-space */
+.mpopup{
+    position:absolute;
+    background:black;
+    border:1px solid #00ff88;
+    padding:14px;
+    width:220px;
+    display:none;
+    z-index:100;
+    pointer-events:none;
+}
+.mpopup.visible{ display:block; pointer-events:auto; }
+.mpopup h3{ font-size:13px; margin-bottom:8px; }
+.mpopup img{ width:100%; border:1px solid #00ff88; margin-top:6px; }
+.mpopup a{ display:block; margin-top:8px; color:#6ed6ff; font-size:12px; }
+
 #cursorTip{
     position:fixed;
     pointer-events:none;
@@ -63,16 +79,6 @@ body{ overflow:hidden; background:black; color:#00ff88; }
     white-space:nowrap;
     display:none;
 }
-
-.popup{
-    position:fixed; top:50%; left:50%;
-    transform:translate(-50%,-50%);
-    background:black; border:1px solid #00ff88;
-    padding:20px; width:320px; display:none; z-index:2000;
-}
-.popup img{ width:100%; margin-top:10px; border:1px solid #00ff88; }
-.popup a{ display:block; margin-top:10px; color:#6ed6ff; }
-.close{ position:absolute; top:5px; right:10px; cursor:pointer; }
 
 .controls{
     position:fixed; bottom:20px; right:20px;
@@ -108,54 +114,70 @@ body{ overflow:hidden; background:black; color:#00ff88; }
 
         <img src="https://operator.coolsquad.xyz/u/luBi56.png" id="map">
 
-        <div class="marker green" style="top:1218px;left:496px;" onclick="openPopup('Placid Wakes FOB')">
+        <div class="marker green" style="top:1218px;left:496px;" onclick="openPopup(event,this,'Placid Wakes FOB')">
             <div class="label">Placid Wakes FOB</div>
+            <div class="mpopup"><h3>Placid Wakes FOB</h3></div>
         </div>
-        <div class="marker red" style="top:1195px;left:594px;" onclick="openPopup('Red Box','https://operator.coolsquad.xyz/u/RIghwK.png','artifact-001.html')">
+
+        <div class="marker red" style="top:1195px;left:594px;" onclick="openPopup(event,this,'Red Box','https://operator.coolsquad.xyz/u/RIghwK.png','artifact-001.html')">
             <div class="label">Red Box</div>
+            <div class="mpopup"><h3>Red Box</h3><img src="https://operator.coolsquad.xyz/u/RIghwK.png"><a href="artifact-001.html" target="_blank">OPEN FILE</a></div>
         </div>
-        <div class="marker red" style="top:373px;left:550px;" onclick="openPopup('The Monolith','https://operator.coolsquad.xyz/u/mH30lg.png','artifact-003.html')">
+
+        <div class="marker red" style="top:373px;left:550px;" onclick="openPopup(event,this,'The Monolith','https://operator.coolsquad.xyz/u/mH30lg.png','artifact-003.html')">
             <div class="label">The Monolith</div>
+            <div class="mpopup"><h3>The Monolith</h3><img src="https://operator.coolsquad.xyz/u/mH30lg.png"><a href="artifact-003.html" target="_blank">OPEN FILE</a></div>
         </div>
-        <div class="marker yellow" style="top:710px;left:690px;" onclick="openPopup('The Church')">
+
+        <div class="marker yellow" style="top:710px;left:690px;" onclick="openPopup(event,this,'The Church')">
             <div class="label">The Church</div>
+            <div class="mpopup"><h3>The Church</h3></div>
         </div>
-        <div class="marker black" style="top:541px;left:750px;" onclick="openPopup('Black Prism')">
+
+        <div class="marker black" style="top:541px;left:750px;" onclick="openPopup(event,this,'Black Prism')">
             <div class="label">Black Prism</div>
+            <div class="mpopup"><h3>Black Prism</h3></div>
         </div>
-        <div class="marker brown" style="top:573px;left:856px;" onclick="openPopup('AP Roots')">
+
+        <div class="marker brown" style="top:573px;left:856px;" onclick="openPopup(event,this,'AP Roots')">
             <div class="label">AP Roots</div>
+            <div class="mpopup"><h3>AP Roots</h3></div>
         </div>
-        <div class="marker brown" style="top:739px;left:758px;" onclick="openPopup('AP Roots')">
+
+        <div class="marker brown" style="top:739px;left:758px;" onclick="openPopup(event,this,'AP Roots')">
             <div class="label">AP Roots</div>
+            <div class="mpopup"><h3>AP Roots</h3></div>
         </div>
-        <div class="marker brown" style="top:627px;left:279px;" onclick="openPopup('AP Roots')">
+
+        <div class="marker brown" style="top:627px;left:279px;" onclick="openPopup(event,this,'AP Roots')">
             <div class="label">AP Roots</div>
+            <div class="mpopup"><h3>AP Roots</h3></div>
         </div>
-        <div class="marker brown" style="top:682px;left:831px;" onclick="openPopup('AP Roots')">
+
+        <div class="marker brown" style="top:682px;left:831px;" onclick="openPopup(event,this,'AP Roots')">
             <div class="label">AP Roots</div>
+            <div class="mpopup"><h3>AP Roots</h3></div>
         </div>
-        <div class="marker white" style="top:686px;left:739px;" onclick="openPopup('Newtons Triangle')">
+
+        <div class="marker white" style="top:686px;left:739px;" onclick="openPopup(event,this,'Newtons Triangle')">
             <div class="label">Newtons Triangle</div>
+            <div class="mpopup"><h3>Newtons Triangle</h3></div>
         </div>
-        <div class="marker white" style="top:643px;left:760px;" onclick="openPopup('Newtons Triangle')">
+
+        <div class="marker white" style="top:643px;left:760px;" onclick="openPopup(event,this,'Newtons Triangle')">
             <div class="label">Newtons Triangle</div>
+            <div class="mpopup"><h3>Newtons Triangle</h3></div>
         </div>
-        <div class="marker white" style="top:680px;left:812px;" onclick="openPopup('Newtons Triangle')">
+
+        <div class="marker white" style="top:680px;left:812px;" onclick="openPopup(event,this,'Newtons Triangle')">
             <div class="label">Newtons Triangle</div>
+            <div class="mpopup"><h3>Newtons Triangle</h3></div>
         </div>
 
     </div>
 </div>
 
 <div id="cursorTip"></div>
-
-<div class="popup" id="popup">
-    <div class="close" onclick="closePopup()">X</div>
-    <h3 id="popupTitle"></h3>
-    <img id="popupImg" style="display:none;">
-    <a id="popupLink" target="_blank"></a>
-</div>
 
 <div class="controls">
     <button onclick="zoomIn()">+</button>
@@ -170,13 +192,15 @@ const tip       = document.getElementById("cursorTip");
 
 let scale = 1, x = 0, y = 0;
 let dragging = false, sx, sy;
+let activePopup = null;
 
+/* ── DRAG ── */
 container.addEventListener("mousedown", e => {
     dragging = true;
     sx = e.clientX - x;
     sy = e.clientY - y;
 });
-window.addEventListener("mouseup",   () => dragging = false);
+window.addEventListener("mouseup", () => dragging = false);
 window.addEventListener("mousemove", e => {
     if(dragging){ x = e.clientX - sx; y = e.clientY - sy; update(); }
 
@@ -196,29 +220,77 @@ window.addEventListener("mousemove", e => {
 container.addEventListener("mouseenter", () => tip.style.display = "block");
 container.addEventListener("mouseleave", () => tip.style.display = "none");
 
-function zoomIn()  { scale = Math.min(5,   +(scale + 0.1).toFixed(2)); update(); }
-function zoomOut() { scale = Math.max(0.2, +(scale - 0.1).toFixed(2)); update(); }
-function update()  { world.style.transform = `translate(${x}px,${y}px) scale(${scale})`; }
-
+/* ── ZOOM TOWARDS CURSOR ── */
 window.addEventListener("wheel", e => {
     e.preventDefault();
-    scale = e.deltaY < 0
-        ? Math.min(5,   +(scale + 0.1).toFixed(2))
-        : Math.max(0.2, +(scale - 0.1).toFixed(2));
+    const delta  = e.deltaY < 0 ? 0.1 : -0.1;
+    const newScale = Math.min(5, Math.max(0.2, +(scale + delta).toFixed(2)));
+    // shift origin so the point under the cursor stays fixed
+    x = e.clientX - (e.clientX - x) * (newScale / scale);
+    y = e.clientY - (e.clientY - y) * (newScale / scale);
+    scale = newScale;
     update();
 }, { passive:false });
 
-function openPopup(title, img, link){
-    document.getElementById("popup").style.display = "block";
-    document.getElementById("popupTitle").innerText = title;
-    const image  = document.getElementById("popupImg");
-    const linkEl = document.getElementById("popupLink");
-    if(img){  image.src = img;    image.style.display = "block"; }
-    else {                        image.style.display = "none";  }
-    if(link){ linkEl.href = link; linkEl.innerText = "OPEN FILE"; linkEl.style.display = "block"; }
-    else {                                                         linkEl.style.display = "none";  }
+function zoomIn(){
+    const cx = window.innerWidth / 2, cy = window.innerHeight / 2;
+    const newScale = Math.min(5, +(scale + 0.1).toFixed(2));
+    x = cx - (cx - x) * (newScale / scale);
+    y = cy - (cy - y) * (newScale / scale);
+    scale = newScale;
+    update();
 }
-function closePopup(){ document.getElementById("popup").style.display = "none"; }
+function zoomOut(){
+    const cx = window.innerWidth / 2, cy = window.innerHeight / 2;
+    const newScale = Math.max(0.2, +(scale - 0.1).toFixed(2));
+    x = cx - (cx - x) * (newScale / scale);
+    y = cy - (cy - y) * (newScale / scale);
+    scale = newScale;
+    update();
+}
+
+function update(){ world.style.transform = `translate(${x}px,${y}px) scale(${scale})`; }
+
+/* ── POPUPS ── */
+function openPopup(e, marker, title){
+    e.stopPropagation();
+
+    // close existing
+    if(activePopup && activePopup !== marker){
+        activePopup.querySelector(".mpopup").classList.remove("visible");
+    }
+
+    const popup = marker.querySelector(".mpopup");
+
+    // toggle off if already open
+    if(popup.classList.contains("visible")){
+        popup.classList.remove("visible");
+        activePopup = null;
+        return;
+    }
+
+    // position popup to the right of the marker dot; flip left if near edge
+    // marker is 10px wide, offset 5px, so dot center is at 0,0 in marker space
+    // we place popup 10px to the right of center
+    popup.style.left  = "10px";
+    popup.style.top   = "-5px";
+    popup.classList.add("visible");
+    activePopup = marker;
+
+    // after it's visible, check if it overflows the map width and flip
+    const markerLeft = parseInt(marker.style.left);
+    if(markerLeft + 10 + 220 > 1158){
+        popup.style.left = (-220 - 10) + "px";
+    }
+}
+
+// click anywhere outside a marker closes all popups
+document.addEventListener("click", e => {
+    if(activePopup && !activePopup.contains(e.target)){
+        activePopup.querySelector(".mpopup").classList.remove("visible");
+        activePopup = null;
+    }
+});
 
 update();
 
