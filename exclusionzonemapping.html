@@ -118,6 +118,23 @@ body{ overflow:hidden; background:black; color:#00ff88; }
     font-size:20px; cursor:pointer;
 }
 
+@keyframes auroraGlow {
+    from {
+        box-shadow:
+            0 0 18px 6px rgba(139,92,246,0.7),
+            0 0 40px 14px rgba(109,40,217,0.5),
+            0 0 80px 30px rgba(29,78,216,0.3),
+            inset 0 0 20px rgba(192,132,252,0.25);
+    }
+    to {
+        box-shadow:
+            0 0 28px 12px rgba(167,120,255,0.9),
+            0 0 60px 24px rgba(139,92,246,0.65),
+            0 0 110px 45px rgba(59,130,246,0.4),
+            inset 0 0 30px rgba(216,180,254,0.35);
+    }
+}
+
 .scanlines{
     position:fixed; inset:0; pointer-events:none;
     background:repeating-linear-gradient(
@@ -144,6 +161,15 @@ body{ overflow:hidden; background:black; color:#00ff88; }
     <div id="mapWorld">
 
         <img src="https://operator.coolsquad.xyz/u/luBi56.png" id="map">
+
+        <!-- Newton's Triangle SVG overlay -->
+        <svg id="triangleOverlay" style="position:absolute;top:0;left:0;width:1158px;height:1320px;pointer-events:none;z-index:5;">
+            <polygon points="739,686 760,643 812,680"
+                fill="rgba(255,255,255,0.12)"
+                stroke="rgba(255,255,255,0.7)"
+                stroke-width="1.5"
+                stroke-dasharray="4,3"/>
+        </svg>
 
         <div class="marker green" style="top:1218px;left:496px;" onclick="openPopup(event,this,'Placid Wakes FOB')">
             <div class="label">Placid Wakes FOB</div>
@@ -225,10 +251,41 @@ body{ overflow:hidden; background:black; color:#00ff88; }
             <div class="mpopup"><h3>Patriarchal Cross #3</h3></div>
         </div>
 
-        <div class="marker purple" style="top:450px;left:835px;" onclick="openPopup(event,this,'Aurora Subsector')">
-            <div class="label">Aurora Subsector</div>
+        <div class="marker" style="
+                top:450px; left:835px;
+                width:100px; height:100px;
+                border-radius:50%;
+                margin-left:-50px; margin-top:-50px;
+                background: radial-gradient(circle, rgba(160,60,255,0.18) 0%, rgba(60,80,255,0.10) 60%, transparent 100%);
+                border: 1.5px solid rgba(180,80,255,0.55);
+                box-shadow:
+                    0 0 18px 4px rgba(140,60,255,0.35),
+                    0 0 40px 10px rgba(80,60,255,0.18),
+                    inset 0 0 20px 4px rgba(160,60,255,0.12);
+                animation: auroraPulse 3s ease-in-out infinite;
+            " onclick="openPopup(event,this,'Aurora Subsector')">
+            <div class="label" style="top:-22px;">Aurora Subsector</div>
             <div class="mpopup"><h3>Aurora Subsector</h3><img src="https://operator.coolsquad.xyz/u/8Dh6HN.png"></div>
         </div>
+
+        <style>
+        @keyframes auroraPulse {
+            0%, 100% {
+                box-shadow:
+                    0 0 18px 4px rgba(140,60,255,0.35),
+                    0 0 40px 10px rgba(80,60,255,0.18),
+                    inset 0 0 20px 4px rgba(160,60,255,0.12);
+                border-color: rgba(180,80,255,0.55);
+            }
+            50% {
+                box-shadow:
+                    0 0 28px 8px rgba(140,60,255,0.55),
+                    0 0 60px 18px rgba(80,60,255,0.30),
+                    inset 0 0 30px 8px rgba(160,60,255,0.20);
+                border-color: rgba(200,100,255,0.80);
+            }
+        }
+        </style>
 
 
     </div>
