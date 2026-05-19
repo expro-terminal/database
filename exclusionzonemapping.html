@@ -178,18 +178,42 @@ body{ overflow:hidden; background:black; color:#00ff88; }
                 stroke-dasharray="4,3"/>
         </svg>
 
-        <!-- Interpolated route line -->
+        <!-- Interpolated route line (smooth catmull-rom spline) -->
         <svg id="routeLine" style="position:absolute;top:0;left:0;width:1158px;height:1320px;pointer-events:none;z-index:6;">
-            <polyline
-                points="496,1214 497,1205 565,1209 620,1205 670,1190 701,1135 708,1037 686,988 690,955 767,902 777,888 770,865 757,848 780,823 820,814 842,820 875,805"
+            <path id="routePath"
                 fill="none"
                 stroke="rgba(255,255,255,0.85)"
                 stroke-width="1.5"
                 stroke-dasharray="5,4"
-                stroke-linejoin="round"
                 stroke-linecap="round"
             />
         </svg>
+        <script>
+        (function(){
+            const pts = [
+                [496,1214],[497,1205],[565,1209],[620,1205],[670,1190],
+                [701,1135],[708,1037],[686,988],[690,955],[767,902],
+                [777,888],[770,865],[757,848],[780,823],[820,814],[842,820],[875,805]
+            ];
+            // Catmull-Rom to cubic bezier conversion (tension 0.5)
+            function catmullToBezier(pts, tension=0.5){
+                let d = `M ${pts[0][0]},${pts[0][1]}`;
+                for(let i = 0; i < pts.length - 1; i++){
+                    const p0 = pts[Math.max(i-1, 0)];
+                    const p1 = pts[i];
+                    const p2 = pts[i+1];
+                    const p3 = pts[Math.min(i+2, pts.length-1)];
+                    const cp1x = p1[0] + (p2[0] - p0[0]) * tension / 2;
+                    const cp1y = p1[1] + (p2[1] - p0[1]) * tension / 2;
+                    const cp2x = p2[0] - (p3[0] - p1[0]) * tension / 2;
+                    const cp2y = p2[1] - (p3[1] - p1[1]) * tension / 2;
+                    d += ` C ${cp1x},${cp1y} ${cp2x},${cp2y} ${p2[0]},${p2[1]}`;
+                }
+                return d;
+            }
+            document.getElementById("routePath").setAttribute("d", catmullToBezier(pts));
+        })();
+        </script>
 
         <div class="marker green" style="top:1218px;left:496px;" onclick="openPopup(event,this,'Placid Wakes FOB')">
             <div class="label">Placid Wakes FOB</div>
