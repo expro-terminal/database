@@ -153,7 +153,7 @@ body{ overflow:hidden; background:black; color:#00ff88; }
 <div class="topbar">
     <h1>EXCLUSION ZONE MAPPING</h1>
     <div style="font-size:12px; color:#7dffb2; margin-top:4px;">
-        RESTRICTED NDA-05+ / WORK IN PROGRESS / NOW WITH EXTRA LARP
+        RESTRICTED NDA-05+ / WORK IN PROGRESS / NOW WITH EXTRA LARP / SUB-GRID MODE
     </div>
 </div>
 
@@ -335,7 +335,21 @@ window.addEventListener("mousemove", e => {
     const colLetter = (col >= 0 && col < COLS) ? String.fromCharCode(65 + col) : "\u2013";
     const rowNumber = (row >= 0 && row < ROWS) ? (row + 1) : "\u2013";
 
-    tip.textContent = colLetter + rowNumber;
+    const px = Math.round(mx);
+    const py = Math.round(my);
+
+    // 3x3 sub-cell within the current grid cell (numbered 1–9, left-to-right, top-to-bottom)
+    let subLabel = "";
+    if(col >= 0 && col < COLS && row >= 0 && row < ROWS){
+        const subX = (mx - GRID_X0) - col * cellW;   // offset within cell
+        const subY = (my - GRID_Y0) - row * cellH;
+        const subCol = Math.floor(subX / (cellW / 3));
+        const subRow = Math.floor(subY / (cellH / 3));
+        const subNum = subRow * 3 + subCol + 1;
+        subLabel = "-" + subNum;
+    }
+
+    tip.textContent = colLetter + rowNumber + subLabel + "   X:" + px + "  Y:" + py;
 
     const pad = 14;
     let tx = e.clientX + pad;
