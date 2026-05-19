@@ -44,8 +44,16 @@ body{ overflow:hidden; background:black; color:#00ff88; }
 .marker{
     position:absolute; width:10px; height:10px;
     border-radius:50%; margin-left:-5px; margin-top:-5px;
-    cursor:pointer; z-index:10;
+    cursor:pointer;
+    /* default z-index for markers */
+    z-index:10;
 }
+
+/* When a marker has an open popup, raise it above everything else */
+.marker.popup-open {
+    z-index:500;
+}
+
 .label{
     position:absolute;
     top:-18px;
@@ -55,6 +63,11 @@ body{ overflow:hidden; background:black; color:#00ff88; }
     white-space:nowrap;
     color:#00ff88;
     pointer-events:none;
+    /* Black background pill behind each label */
+    background: rgba(0, 0, 0, 0.85);
+    padding: 1px 4px;
+    border: 1px solid rgba(0, 255, 136, 0.25);
+    line-height: 1.4;
 }
 
 .green  { background:#00ff88; }
@@ -63,7 +76,7 @@ body{ overflow:hidden; background:black; color:#00ff88; }
 .black  { background:#111; border:1px solid #00ff88; }
 .brown  { background:#8b5a2b; }
 .white  { background:#fff; }
-.purple  { background:#800080; }
+.purple { background:#800080; }
 
 /* popup anchored next to marker in map-space */
 .mpopup{
@@ -73,7 +86,8 @@ body{ overflow:hidden; background:black; color:#00ff88; }
     padding:14px;
     width:220px;
     display:none;
-    z-index:100;
+    /* popup sits above labels/markers when visible */
+    z-index:200;
     pointer-events:none;
 }
 .mpopup.visible{ display:block; pointer-events:auto; }
@@ -236,6 +250,7 @@ const tip       = document.getElementById("cursorTip");
 let scale = 1, x = 0, y = 0;
 let dragging = false, sx, sy;
 let activePopup = null;
+let activeMarker = null;
 
 /* ── DRAG ── */
 container.addEventListener("mousedown", e => {
@@ -268,7 +283,6 @@ window.addEventListener("wheel", e => {
     e.preventDefault();
     const delta  = e.deltaY < 0 ? 0.1 : -0.1;
     const newScale = Math.min(5, Math.max(0.2, +(scale + delta).toFixed(2)));
-    // shift origin so the point under the cursor stays fixed
     x = e.clientX - (e.clientX - x) * (newScale / scale);
     y = e.clientY - (e.clientY - y) * (newScale / scale);
     scale = newScale;
@@ -299,8 +313,9 @@ function openPopup(e, marker, title){
     e.stopPropagation();
 
     // close existing
-    if(activePopup && activePopup !== marker){
-        activePopup.querySelector(".mpopup").classList.remove("visible");
+    if(activeMarker && activeMarker !== marker){
+        activeMarker.querySelector(".mpopup").classList.remove("visible");
+        activeMarker.classList.remove("popup-open");
     }
 
     const popup = marker.querySelector(".mpopup");
@@ -308,17 +323,20 @@ function openPopup(e, marker, title){
     // toggle off if already open
     if(popup.classList.contains("visible")){
         popup.classList.remove("visible");
+        marker.classList.remove("popup-open");
         activePopup = null;
+        activeMarker = null;
         return;
     }
 
-    // position popup to the right of the marker dot; flip left if near edge
-    // marker is 10px wide, offset 5px, so dot center is at 0,0 in marker space
-    // we place popup 10px to the right of center
+    // position popup to the right of the marker dot
     popup.style.left  = "10px";
     popup.style.top   = "-5px";
     popup.classList.add("visible");
-    activePopup = marker;
+    // raise this marker above all others so popup clears sibling markers/labels
+    marker.classList.add("popup-open");
+    activePopup = popup;
+    activeMarker = marker;
 
     // after it's visible, check if it overflows the map width and flip
     const markerLeft = parseInt(marker.style.left);
@@ -329,9 +347,11 @@ function openPopup(e, marker, title){
 
 // click anywhere outside a marker closes all popups
 document.addEventListener("click", e => {
-    if(activePopup && !activePopup.contains(e.target)){
-        activePopup.querySelector(".mpopup").classList.remove("visible");
+    if(activeMarker && !activeMarker.contains(e.target)){
+        activeMarker.querySelector(".mpopup").classList.remove("visible");
+        activeMarker.classList.remove("popup-open");
         activePopup = null;
+        activeMarker = null;
     }
 });
 
