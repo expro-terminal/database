@@ -144,6 +144,13 @@ body{ overflow:hidden; background:black; color:#00ff88; }
     );
 }
 
+/* Toggle states */
+.labels-hidden .label { display:none !important; }
+.markers-hidden .marker { opacity:0; pointer-events:none; }
+.markers-hidden .marker.popup-open { opacity:1; pointer-events:auto; }
+
+.controls button.off { opacity:0.3; }
+
 </style>
 </head>
 <body>
@@ -153,7 +160,7 @@ body{ overflow:hidden; background:black; color:#00ff88; }
 <div class="topbar">
     <h1>EXCLUSION ZONE MAPPING</h1>
     <div style="font-size:12px; color:#7dffb2; margin-top:4px;">
-        RESTRICTED NDA-05+ / WORK IN PROGRESS
+        RESTRICTED NDA-05+ / WORK IN PROGRESS / NOW WITH EXTRA LARP
     </div>
 </div>
 
@@ -169,6 +176,19 @@ body{ overflow:hidden; background:black; color:#00ff88; }
                 stroke="rgba(255,255,255,0.7)"
                 stroke-width="1.5"
                 stroke-dasharray="4,3"/>
+        </svg>
+
+        <!-- Interpolated route line -->
+        <svg id="routeLine" style="position:absolute;top:0;left:0;width:1158px;height:1320px;pointer-events:none;z-index:6;">
+            <polyline
+                points="496,1214 497,1205 565,1209 620,1205 670,1190 701,1135 708,1037 686,988 690,955 767,902 777,888 770,865 757,848 780,823 820,814 842,820 875,805"
+                fill="none"
+                stroke="rgba(255,255,255,0.85)"
+                stroke-width="1.5"
+                stroke-dasharray="5,4"
+                stroke-linejoin="round"
+                stroke-linecap="round"
+            />
         </svg>
 
         <div class="marker green" style="top:1218px;left:496px;" onclick="openPopup(event,this,'Placid Wakes FOB')">
@@ -296,6 +316,8 @@ body{ overflow:hidden; background:black; color:#00ff88; }
 <div class="controls">
     <button onclick="zoomIn()">+</button>
     <button onclick="zoomOut()">−</button>
+    <button onclick="toggleLabels()" id="btnLabels" title="Toggle labels">𝐓</button>
+    <button onclick="toggleMarkers()" id="btnMarkers" title="Toggle markers">◉</button>
 </div>
 
 <script>
@@ -323,8 +345,8 @@ window.addEventListener("mousemove", e => {
     const my = (e.clientY - y) / scale;
 
     // Grid spans X 31–1158 (21 cols, A–U) and Y 31–1320 (24 rows, 1–24)
-    const GRID_X0 = 24, GRID_X1 = 1158;
-    const GRID_Y0 = 24, GRID_Y1 = 1320;
+    const GRID_X0 = 31, GRID_X1 = 1158;
+    const GRID_Y0 = 31, GRID_Y1 = 1320;
     const COLS = 21, ROWS = 24;
     const cellW = (GRID_X1 - GRID_X0) / COLS;
     const cellH = (GRID_Y1 - GRID_Y0) / ROWS;
@@ -337,19 +359,7 @@ window.addEventListener("mousemove", e => {
 
     const px = Math.round(mx);
     const py = Math.round(my);
-
-    // 3x3 sub-cell within the current grid cell (numbered 1–9, left-to-right, top-to-bottom)
-    let subLabel = "";
-    if(col >= 0 && col < COLS && row >= 0 && row < ROWS){
-        const subX = (mx - GRID_X0) - col * cellW;   // offset within cell
-        const subY = (my - GRID_Y0) - row * cellH;
-        const subCol = Math.floor(subX / (cellW / 3));
-        const subRow = Math.floor(subY / (cellH / 3));
-        const subNum = subRow * 3 + subCol + 1;
-        subLabel = "-" + subNum;
-    }
-
-    tip.textContent = colLetter + rowNumber + subLabel + "   X:" + px + "  Y:" + py;
+    tip.textContent = colLetter + rowNumber + "   X:" + px + "  Y:" + py;
 
     const pad = 14;
     let tx = e.clientX + pad;
@@ -441,6 +451,29 @@ document.addEventListener("click", e => {
 });
 
 update();
+
+/* ── TOGGLES ── */
+let labelsOn  = true;
+let markersOn = true;
+
+function toggleLabels(){
+    labelsOn = !labelsOn;
+    document.getElementById("mapContainer").classList.toggle("labels-hidden", !labelsOn);
+    document.getElementById("btnLabels").classList.toggle("off", !labelsOn);
+}
+
+function toggleMarkers(){
+    markersOn = !markersOn;
+    document.getElementById("mapContainer").classList.toggle("markers-hidden", !markersOn);
+    document.getElementById("btnMarkers").classList.toggle("off", !markersOn);
+    // close any open popup when hiding markers
+    if(!markersOn && activeMarker){
+        activeMarker.querySelector(".mpopup").classList.remove("visible");
+        activeMarker.classList.remove("popup-open");
+        activePopup = null;
+        activeMarker = null;
+    }
+}
 
 </script>
 </body>
