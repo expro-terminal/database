@@ -369,8 +369,8 @@ window.addEventListener("mousemove", e => {
     const my = (e.clientY - y) / scale;
 
     // Grid spans X 31–1158 (21 cols, A–U) and Y 31–1320 (24 rows, 1–24)
-    const GRID_X0 = 31, GRID_X1 = 1158;
-    const GRID_Y0 = 31, GRID_Y1 = 1320;
+    const GRID_X0 = 24, GRID_X1 = 1158;
+    const GRID_Y0 = 24, GRID_Y1 = 1320;
     const COLS = 21, ROWS = 24;
     const cellW = (GRID_X1 - GRID_X0) / COLS;
     const cellH = (GRID_Y1 - GRID_Y0) / ROWS;
@@ -383,7 +383,19 @@ window.addEventListener("mousemove", e => {
 
     const px = Math.round(mx);
     const py = Math.round(my);
-    tip.textContent = colLetter + rowNumber + "   X:" + px + "  Y:" + py;
+
+    // 3x3 sub-cell within the current grid cell (numbered 1–9, left-to-right, top-to-bottom)
+    let subLabel = "";
+    if(col >= 0 && col < COLS && row >= 0 && row < ROWS){
+        const subX = (mx - GRID_X0) - col * cellW;
+        const subY = (my - GRID_Y0) - row * cellH;
+        const subCol = Math.floor(subX / (cellW / 3));
+        const subRow = Math.floor(subY / (cellH / 3));
+        const subNum = Math.min(subRow * 3 + subCol + 1, 9);
+        subLabel = "-" + subNum;
+    }
+
+    tip.textContent = colLetter + rowNumber + subLabel + "   X:" + px + "  Y:" + py;
 
     const pad = 14;
     let tx = e.clientX + pad;
