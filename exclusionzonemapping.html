@@ -319,9 +319,23 @@ window.addEventListener("mouseup", () => dragging = false);
 window.addEventListener("mousemove", e => {
     if(dragging){ x = e.clientX - sx; y = e.clientY - sy; update(); }
 
-    const mx = Math.round((e.clientX - x) / scale);
-    const my = Math.round((e.clientY - y) / scale);
-    tip.textContent = "X:" + mx + "  Y:" + my;
+    const mx = (e.clientX - x) / scale;
+    const my = (e.clientY - y) / scale;
+
+    // Grid spans X 31–1158 (21 cols, A–U) and Y 31–1320 (24 rows, 1–24)
+    const GRID_X0 = 31, GRID_X1 = 1158;
+    const GRID_Y0 = 31, GRID_Y1 = 1320;
+    const COLS = 21, ROWS = 24;
+    const cellW = (GRID_X1 - GRID_X0) / COLS;
+    const cellH = (GRID_Y1 - GRID_Y0) / ROWS;
+
+    const col = Math.floor((mx - GRID_X0) / cellW);
+    const row = Math.floor((my - GRID_Y0) / cellH);
+
+    const colLetter = (col >= 0 && col < COLS) ? String.fromCharCode(65 + col) : "\u2013";
+    const rowNumber = (row >= 0 && row < ROWS) ? (row + 1) : "\u2013";
+
+    tip.textContent = colLetter + rowNumber;
 
     const pad = 14;
     let tx = e.clientX + pad;
