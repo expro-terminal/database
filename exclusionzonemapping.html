@@ -70,13 +70,13 @@ body{ overflow:hidden; background:black; color:#00ff88; }
     line-height: 1.4;
 }
 
-.green  { background:#00ff88; }
-.red    { background:#ff3b3b; }
-.yellow { background:#ffd000; }
-.black  { background:#111; border:1px solid #00ff88; }
-.brown  { background:#8b5a2b; }
-.white  { background:#fff; }
-.purple { background:#800080; }
+.green  { background:#00ff88; box-shadow: 0 0 6px 2px rgba(0,255,136,0.7), 0 0 14px 4px rgba(0,255,136,0.3); }
+.red    { background:#ff3b3b; box-shadow: 0 0 6px 2px rgba(255,59,59,0.7),  0 0 14px 4px rgba(255,59,59,0.3); }
+.yellow { background:#ffd000; box-shadow: 0 0 6px 2px rgba(255,208,0,0.7),  0 0 14px 4px rgba(255,208,0,0.3); }
+.black  { background:#111; border:1px solid #00ff88; box-shadow: 0 0 6px 2px rgba(0,255,136,0.5), 0 0 14px 4px rgba(0,255,136,0.2); }
+.brown  { background:#8b5a2b; box-shadow: 0 0 6px 2px rgba(139,90,43,0.8),  0 0 14px 4px rgba(139,90,43,0.3); }
+.white  { background:#fff;    box-shadow: 0 0 6px 2px rgba(255,255,255,0.8), 0 0 14px 4px rgba(255,255,255,0.3); }
+.purple { background:#800080; box-shadow: 0 0 6px 2px rgba(160,0,160,0.8),  0 0 14px 4px rgba(160,0,160,0.3); }
 
 /* popup anchored next to marker in map-space */
 .mpopup{
@@ -253,9 +253,9 @@ body{ overflow:hidden; background:black; color:#00ff88; }
 
         <div class="marker" style="
                 top:450px; left:835px;
-                width:100px; height:100px;
+                width:150px; height:150px;
                 border-radius:50%;
-                margin-left:-50px; margin-top:-50px;
+                margin-left:-75px; margin-top:-75px;
                 background: radial-gradient(circle, rgba(160,60,255,0.18) 0%, rgba(60,80,255,0.10) 60%, transparent 100%);
                 border: 1.5px solid rgba(180,80,255,0.55);
                 box-shadow:
