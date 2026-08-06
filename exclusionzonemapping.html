@@ -45,29 +45,29 @@ body{ overflow:hidden; background:black; color:#00ff88; }
     position:absolute; width:10px; height:10px;
     border-radius:50%; margin-left:-5px; margin-top:-5px;
     cursor:pointer;
-    /* default z-index for markers */
     z-index:10;
 }
 
-/* When a marker has an open popup, raise it above everything else */
 .marker.popup-open {
     z-index:500;
 }
 
 .label{
     position:absolute;
-    top:-18px;
+    top:-22px;
     left:50%;
-    transform:translateX(-50%);
-    font-size:10px;
+    /* JS overrides transform with counter-scale */
+    transform: translateX(-50%);
+    transform-origin: center bottom;
+    font-size:12px;
     white-space:nowrap;
     color:#00ff88;
     pointer-events:none;
-    /* Black background pill behind each label */
-    background: rgba(0, 0, 0, 0.85);
-    padding: 1px 4px;
-    border: 1px solid rgba(0, 255, 136, 0.25);
-    line-height: 1.4;
+    background: rgba(0, 0, 0, 0.88);
+    padding: 2px 6px;
+    border: 1px solid rgba(0, 255, 136, 0.3);
+    line-height: 1.5;
+    transition: opacity 0.15s;
 }
 
 .green  { background:#00ff88; box-shadow: 0 0 6px 2px rgba(0,255,136,0.7), 0 0 14px 4px rgba(0,255,136,0.3); }
@@ -77,21 +77,38 @@ body{ overflow:hidden; background:black; color:#00ff88; }
 .brown  { background:#8b5a2b; box-shadow: 0 0 6px 2px rgba(139,90,43,0.8),  0 0 14px 4px rgba(139,90,43,0.3); }
 .white  { background:#fff;    box-shadow: 0 0 6px 2px rgba(255,255,255,0.8), 0 0 14px 4px rgba(255,255,255,0.3); }
 .purple { background:#800080; box-shadow: 0 0 6px 2px rgba(160,0,160,0.8),  0 0 14px 4px rgba(160,0,160,0.3); }
-.blue   { background:#ADD8E6; box-shadow: 0 0 6px 2px rgba(173,216,230,0.8),  0 0 14px 4px rgba(173,216,230,0.8); }
+.blue   { background:#ADD8E6; box-shadow: 0 0 6px 2px rgba(173,216,230,0.8), 0 0 14px 4px rgba(173,216,230,0.8); }
 
-/* popup anchored next to marker in map-space */
 .mpopup{
     position:absolute;
-    background:black;
+    background: black;
     border:1px solid #00ff88;
     padding:14px;
     width:220px;
     display:none;
-    /* popup sits above labels/markers when visible */
     z-index:200;
     pointer-events:none;
 }
 .mpopup.visible{ display:block; pointer-events:auto; }
+.mpopup-header{ display:flex; justify-content:space-between; align-items:flex-start; gap:8px; margin-bottom:8px; }
+.mpopup-header h3{ font-size:13px; margin:0; flex:1; }
+.seer-id{
+    flex-shrink:0;
+    background: repeating-linear-gradient(
+        to bottom,
+        rgba(180,0,0,0.15) 0px,
+        rgba(180,0,0,0.15) 1px,
+        rgba(0,0,0,0.95) 1px,
+        rgba(0,0,0,0.95) 3px
+    );
+    border:1px solid #ff4444;
+    color:#ff6666;
+    font-size:9px;
+    padding:2px 5px;
+    white-space:nowrap;
+    line-height:1.4;
+    font-family:"Courier New",monospace;
+}
 .mpopup h3{ font-size:13px; margin-bottom:8px; }
 .mpopup img{ width:100%; border:1px solid #00ff88; margin-top:6px; }
 .mpopup a{ display:block; margin-top:8px; color:#6ed6ff; font-size:12px; }
@@ -119,23 +136,6 @@ body{ overflow:hidden; background:black; color:#00ff88; }
     font-size:20px; cursor:pointer;
 }
 
-@keyframes auroraGlow {
-    from {
-        box-shadow:
-            0 0 18px 6px rgba(139,92,246,0.7),
-            0 0 40px 14px rgba(109,40,217,0.5),
-            0 0 80px 30px rgba(29,78,216,0.3),
-            inset 0 0 20px rgba(192,132,252,0.25);
-    }
-    to {
-        box-shadow:
-            0 0 28px 12px rgba(167,120,255,0.9),
-            0 0 60px 24px rgba(139,92,246,0.65),
-            0 0 110px 45px rgba(59,130,246,0.4),
-            inset 0 0 30px rgba(216,180,254,0.35);
-    }
-}
-
 .scanlines{
     position:fixed; inset:0; pointer-events:none;
     background:repeating-linear-gradient(
@@ -149,8 +149,24 @@ body{ overflow:hidden; background:black; color:#00ff88; }
 .labels-hidden .label { display:none !important; }
 .markers-hidden .marker { opacity:0; pointer-events:none; }
 .markers-hidden .marker.popup-open { opacity:1; pointer-events:auto; }
-
 .controls button.off { opacity:0.3; }
+
+@keyframes auroraPulse {
+    0%, 100% {
+        box-shadow:
+            0 0 18px 4px rgba(140,60,255,0.35),
+            0 0 40px 10px rgba(80,60,255,0.18),
+            inset 0 0 20px 4px rgba(160,60,255,0.12);
+        border-color: rgba(180,80,255,0.55);
+    }
+    50% {
+        box-shadow:
+            0 0 28px 8px rgba(140,60,255,0.55),
+            0 0 60px 18px rgba(80,60,255,0.30),
+            inset 0 0 30px 8px rgba(160,60,255,0.20);
+        border-color: rgba(200,100,255,0.80);
+    }
+}
 
 </style>
 </head>
@@ -187,7 +203,6 @@ body{ overflow:hidden; background:black; color:#00ff88; }
                 [701,1135],[708,1037],[686,988],[690,955],[767,902],
                 [777,888],[770,865],[757,848],[780,823],[820,814],[842,820],[875,805]
             ];
-            // Catmull-Rom to cubic bezier conversion (tension 0.5)
             function catmullToBezier(pts, tension=0.5){
                 let d = `M ${pts[0][0]},${pts[0][1]}`;
                 for(let i = 0; i < pts.length - 1; i++){
@@ -207,89 +222,109 @@ body{ overflow:hidden; background:black; color:#00ff88; }
         })();
         </script>
 
-        <div class="marker green" style="top:1218px;left:496px;" onclick="openPopup(event,this,'Placid Wakes FOB')">
+        <div class="marker green" style="top:1218px;left:496px;" onclick="openPopup(event,this)">
             <div class="label">Placid Wakes FOB</div>
             <div class="mpopup"><h3>Placid Wakes FOB</h3></div>
         </div>
 
-        <div class="marker red" style="top:1195px;left:594px;" onclick="openPopup(event,this,'Failed Containment #1','https://operator.coolsquad.xyz/u/RIghwK.png','artifact-001.html')">
-            <div class="label">&&& • Containment #1</div>
-            <div class="mpopup"><h3>Emits deadly abberant pressure in a extremely small radius</h3><img src="https://operator.coolsquad.xyz/u/RIghwK.png"></div>
+        <div class="marker red" style="top:1195px;left:594px;" onclick="openPopup(event,this)">
+            <div class="label">&amp;&amp;&amp; • Containment #1</div>
+            <div class="mpopup"><div class="mpopup-header"><h3>Emits deadly aberrant pressure in an extremely small radius</h3><div class="seer-id">SEER ID:<br>&amp;&amp;&amp;</div></div><img src="https://operator.coolsquad.xyz/u/RIghwK.png"></div>
         </div>
 
-        <div class="marker red" style="top:755px;left:925px;" onclick="openPopup(event,this,'Failed Containment #2','https://operator.coolsquad.xyz/u/RIghwK.png','artifact-001.html')">
-            <div class="label">&&& • Containment #2</div>
-            <div class="mpopup"><h3>Same look as Containment #1 but floats around in the area and emits no aberrant pressure</h3><img src="https://operator.coolsquad.xyz/u/6BOyNx.png"></div>
+        <div class="marker red" style="top:755px;left:925px;" onclick="openPopup(event,this)">
+            <div class="label">&amp;&amp;&amp; • Containment #2</div>
+            <div class="mpopup"><div class="mpopup-header"><h3>Same look as Containment #1 but floats around in the area and emits no aberrant pressure</h3><div class="seer-id">SEER ID:<br>&amp;&amp;&amp;</div></div><img src="https://operator.coolsquad.xyz/u/6BOyNx.png"></div>
         </div>
 
-        <div class="marker red" style="top:373px;left:550px;" onclick="openPopup(event,this,'The Monolith','https://operator.coolsquad.xyz/u/mH30lg.png','artifact-003.html')">
+        <div class="marker red" style="top:373px;left:550px;" onclick="openPopup(event,this)">
             <div class="label">*** • Monolith</div>
-            <div class="mpopup"><h3>The Monolith</h3><img src="https://operator.coolsquad.xyz/u/mH30lg.png"></div>
+            <div class="mpopup"><div class="mpopup-header"><h3>The Monolith</h3><div class="seer-id">SEER ID:<br>***</div></div><img src="https://operator.coolsquad.xyz/u/mH30lg.png"></div>
         </div>
 
-        <div class="marker yellow" style="top:710px;left:690px;" onclick="openPopup(event,this,'The Church')">
+        <div class="marker yellow" style="top:710px;left:690px;" onclick="openPopup(event,this)">
             <div class="label">+++ • Church</div>
-            <div class="mpopup"><h3>Complete AP suppression within the vicinity of the cross inside</h3></div>
+            <div class="mpopup"><div class="mpopup-header"><h3>Complete AP suppression within the vicinity of the cross inside</h3><div class="seer-id">SEER ID:<br>+++</div></div><img src="https://operator.coolsquad.xyz/u/HX9aSw.png"></div>
         </div>
 
-        <div class="marker black" style="top:541px;left:750px;" onclick="openPopup(event,this,'Black Prism')">
+        <div class="marker black" style="top:541px;left:750px;" onclick="openPopup(event,this)">
             <div class="label">*** • Prism</div>
-            <div class="mpopup"><h3>The Prism</h3><img src="https://operator.coolsquad.xyz/u/XFIufE.png"></div>
+            <div class="mpopup"><div class="mpopup-header"><h3>The Prism</h3><div class="seer-id">SEER ID:<br>***</div></div><img src="https://operator.coolsquad.xyz/u/XFIufE.png"></div>
         </div>
 
-        <div class="marker brown" style="top:573px;left:856px;" onclick="openPopup(event,this,'AP Roots')">
-            <div class="label">&&& • Special Roots</div>
-            <div class="mpopup"><h3>Rupture Source</h3></div>
+        <div class="marker brown" style="top:573px;left:856px;" onclick="openPopup(event,this)">
+            <div class="label">&amp;&amp;&amp; • Special Roots</div>
+            <div class="mpopup"><div class="mpopup-header"><h3>Rupture Source</h3><div class="seer-id">SEER ID:<br>&amp;&amp;&amp;</div></div></div>
         </div>
 
-        <div class="marker brown" style="top:739px;left:758px;" onclick="openPopup(event,this,'AP Roots')">
-            <div class="label">&&& • Special Roots</div>
-            <div class="mpopup"><h3>Rupture Source</h3></div>
+        <div class="marker brown" style="top:739px;left:758px;" onclick="openPopup(event,this)">
+            <div class="label">&amp;&amp;&amp; • Special Roots</div>
+            <div class="mpopup"><div class="mpopup-header"><h3>Rupture Source</h3><div class="seer-id">SEER ID:<br>&amp;&amp;&amp;</div></div></div>
         </div>
 
-        <div class="marker brown" style="top:627px;left:279px;" onclick="openPopup(event,this,'AP Roots')">
-            <div class="label">&&& • Special Roots</div>
-            <div class="mpopup"><h3>Rupture Source</h3></div>
+        <div class="marker brown" style="top:627px;left:279px;" onclick="openPopup(event,this)">
+            <div class="label">&amp;&amp;&amp; • Special Roots</div>
+            <div class="mpopup"><div class="mpopup-header"><h3>Rupture Source</h3><div class="seer-id">SEER ID:<br>&amp;&amp;&amp;</div></div></div>
         </div>
 
-        <div class="marker brown" style="top:682px;left:831px;" onclick="openPopup(event,this,'AP Roots')">
-            <div class="label">&&& • Special Roots</div>
-            <div class="mpopup"><h3>Rupture Source</h3></div>
+        <div class="marker brown" style="top:682px;left:831px;" onclick="openPopup(event,this)">
+            <div class="label">&amp;&amp;&amp; • Special Roots</div>
+            <div class="mpopup"><div class="mpopup-header"><h3>Rupture Source</h3><div class="seer-id">SEER ID:<br>&amp;&amp;&amp;</div></div></div>
         </div>
 
-        <div class="marker white" style="top:686px;left:739px;" onclick="openPopup(event,this,'The Orbs')">
-            <div class="label"><=> • Orb</div>
-            <div class="mpopup"><h3>Artifact 004 - Orb</h3></div>
+        <div class="marker white" style="top:686px;left:739px;" onclick="openPopup(event,this)">
+            <div class="label">&lt;=&gt; • Orb</div>
+            <div class="mpopup"><div class="mpopup-header"><h3>Artifact 004 - Orb</h3><div class="seer-id">SEER ID:<br>&lt;=&gt;</div></div><img src="https://operator.coolsquad.xyz/u/0eg7oH.png"></div>
         </div>
 
-        <div class="marker white" style="top:643px;left:760px;" onclick="openPopup(event,this,'The Orbs')">
-            <div class="label"><=> • Orb</div>
-            <div class="mpopup"><h3>Artifact 004 - Orb</h3></div>
+        <div class="marker white" style="top:643px;left:760px;" onclick="openPopup(event,this)">
+            <div class="label">&lt;=&gt; • Orb</div>
+            <div class="mpopup"><div class="mpopup-header"><h3>Orb, kills you if you get too close.</h3><div class="seer-id">SEER ID:<br>&lt;=&gt;</div></div><img src="https://operator.coolsquad.xyz/u/0eg7oH.png"></div>
         </div>
 
-        <div class="marker white" style="top:680px;left:812px;" onclick="openPopup(event,this,'The Orbs')">
-            <div class="label"><=> • Orb</div>
-            <div class="mpopup"><h3>Artifact 004 - Orb</h3></div>
+        <div class="marker white" style="top:680px;left:812px;" onclick="openPopup(event,this)">
+            <div class="label">&lt;=&gt; • Orb</div>
+            <div class="mpopup"><div class="mpopup-header"><h3>Orb, kills you if you get too close.</h3><div class="seer-id">SEER ID:<br>&lt;=&gt;</div></div><img src="https://operator.coolsquad.xyz/u/0eg7oH.png"></div>
         </div>
 
-        <div class="marker yellow" style="top:739px;left:874px;" onclick="openPopup(event,this,'Patriarchal Cross #1')">
+        <div class="marker white" style="top:634px;left:740px;" onclick="openPopup(event,this)">
+            <div class="label">&lt;=&gt; • Orb</div>
+            <div class="mpopup"><div class="mpopup-header"><h3>Orb, kills you if you get too close.</h3><div class="seer-id">SEER ID:<br>&lt;=&gt;</div></div><img src="https://operator.coolsquad.xyz/u/0eg7oH.png"></div>
+        </div>
+
+        <div class="marker white" style="top:770px;left:720px;" onclick="openPopup(event,this)">
+            <div class="label">&lt;=&gt; • Orb</div>
+            <div class="mpopup"><div class="mpopup-header"><h3>Orb, kills you if you get too close.</h3><div class="seer-id">SEER ID:<br>&lt;=&gt;</div></div><img src="https://operator.coolsquad.xyz/u/0eg7oH.png"></div>
+        </div>
+
+        <div class="marker blue" style="top:740px;left:895px;" onclick="openPopup(event,this)">
+            <div class="label">Watchtower</div>
+            <div class="mpopup"><h3>Watchtower</h3><img src="https://operator.coolsquad.xyz/u/L1mJ1N.png"></div>
+        </div>
+
+        <div class="marker purple" style="top:625px;left:800px;" onclick="openPopup(event,this)">
+            <div class="label">(0) • Shards</div>
+            <div class="mpopup"><h3>Shards</h3></div>
+        </div>
+
+        <div class="marker yellow" style="top:750px;left:870px;" onclick="openPopup(event,this)">
             <div class="label">+ • Cross #1</div>
-            <div class="mpopup"><h3>Patriarchal Cross, emits some AP</h3></div>
+            <div class="mpopup"><div class="mpopup-header"><h3>Patriarchal Cross, emits some AP</h3><div class="seer-id">SEER ID:<br>+</div></div></div>
         </div>
 
-        <div class="marker yellow" style="top:685px;left:885px;" onclick="openPopup(event,this,'Patriarchal Cross #2')">
+        <div class="marker yellow" style="top:685px;left:885px;" onclick="openPopup(event,this)">
             <div class="label">+ • Cross #2</div>
-            <div class="mpopup"><h3>Patriarchal Cross, emits some AP</h3><img src="https://operator.coolsquad.xyz/u/Ouz594.jpg"></div>
+            <div class="mpopup"><div class="mpopup-header"><h3>Patriarchal Cross, emits some AP</h3><div class="seer-id">SEER ID:<br>+</div></div><img src="https://operator.coolsquad.xyz/u/Ouz594.jpg"></div>
         </div>
 
-        <div class="marker yellow" style="top:630px;left:690px;" onclick="openPopup(event,this,'Patriarchal Cross #3')">
+        <div class="marker yellow" style="top:630px;left:690px;" onclick="openPopup(event,this)">
             <div class="label">+ • Cross #3</div>
-            <div class="mpopup"><h3>Patriarchal Cross, emits some AP</h3></div>
+            <div class="mpopup"><div class="mpopup-header"><h3>Patriarchal Cross, emits some AP</h3><div class="seer-id">SEER ID:<br>+</div></div></div>
         </div>
 
-        <div class="marker blue" style="top:1130px;left:590px;" onclick="openPopup(event,this,'Shooting Range')">
+        <div class="marker blue" style="top:1130px;left:590px;" onclick="openPopup(event,this)">
             <div class="label">Shooting Range</div>
-            <div class="mpopup"><h3>Shooting Range, just here i guess. </h3><img src="https://operator.coolsquad.xyz/u/lMZBf0.png"></div>
+            <div class="mpopup"><h3>Shooting Range, just here i guess.</h3><img src="https://operator.coolsquad.xyz/u/lMZBf0.png"></div>
         </div>
 
         <div class="marker" style="
@@ -304,30 +339,10 @@ body{ overflow:hidden; background:black; color:#00ff88; }
                     0 0 40px 10px rgba(80,60,255,0.18),
                     inset 0 0 20px 4px rgba(160,60,255,0.12);
                 animation: auroraPulse 3s ease-in-out infinite;
-            " onclick="openPopup(event,this,'Aurora Subsector')">
-            <div class="label" style="top:-22px;">Aurora Subsector</div>
+            " onclick="openPopup(event,this)">
+            <div class="label" style="top:-26px;">Aurora Subsector</div>
             <div class="mpopup"><h3>Aurora Subsector</h3><img src="https://operator.coolsquad.xyz/u/8Dh6HN.png"></div>
         </div>
-
-        <style>
-        @keyframes auroraPulse {
-            0%, 100% {
-                box-shadow:
-                    0 0 18px 4px rgba(140,60,255,0.35),
-                    0 0 40px 10px rgba(80,60,255,0.18),
-                    inset 0 0 20px 4px rgba(160,60,255,0.12);
-                border-color: rgba(180,80,255,0.55);
-            }
-            50% {
-                box-shadow:
-                    0 0 28px 8px rgba(140,60,255,0.55),
-                    0 0 60px 18px rgba(80,60,255,0.30),
-                    inset 0 0 30px 8px rgba(160,60,255,0.20);
-                border-color: rgba(200,100,255,0.80);
-            }
-        }
-        </style>
-
 
     </div>
 </div>
@@ -351,6 +366,8 @@ let scale = 1, x = 0, y = 0;
 let dragging = false, sx, sy;
 let activePopup = null;
 let activeMarker = null;
+let labelsOn  = true;
+let markersOn = true;
 
 /* ── DRAG ── */
 container.addEventListener("mousedown", e => {
@@ -365,7 +382,6 @@ window.addEventListener("mousemove", e => {
     const mx = (e.clientX - x) / scale;
     const my = (e.clientY - y) / scale;
 
-    // Grid spans X 31–1158 (21 cols, A–U) and Y 31–1320 (24 rows, 1–24)
     const GRID_X0 = 24, GRID_X1 = 1158;
     const GRID_Y0 = 24, GRID_Y1 = 1320;
     const COLS = 21, ROWS = 24;
@@ -381,7 +397,6 @@ window.addEventListener("mousemove", e => {
     const px = Math.round(mx);
     const py = Math.round(my);
 
-    // 3x3 sub-cell within the current grid cell (numbered 1–9, left-to-right, top-to-bottom)
     let subLabel = "";
     if(col >= 0 && col < COLS && row >= 0 && row < ROWS){
         const subX = (mx - GRID_X0) - col * cellW;
@@ -406,7 +421,7 @@ window.addEventListener("mousemove", e => {
 container.addEventListener("mouseenter", () => tip.style.display = "block");
 container.addEventListener("mouseleave", () => tip.style.display = "none");
 
-/* ── ZOOM TOWARDS CURSOR ── */
+/* ── ZOOM ── */
 window.addEventListener("wheel", e => {
     e.preventDefault();
     const delta  = e.deltaY < 0 ? 0.1 : -0.1;
@@ -434,13 +449,25 @@ function zoomOut(){
     update();
 }
 
-function update(){ world.style.transform = `translate(${x}px,${y}px) scale(${scale})`; }
+function update(){
+    world.style.transform = `translate(${x}px,${y}px) scale(${scale})`;
+
+    // Partial counter-scale: labels grow when zoomed in, shrink when zoomed out.
+    // Using 1/sqrt(scale) means they scale at half the rate of the map —
+    // bigger when zoomed in, smaller (less overlap) when zoomed out.
+    // Fades out below scale 0.35 to avoid clutter.
+    const labelScale = 1 / Math.sqrt(scale);
+    const labelOpacity = labelsOn ? (scale < 0.35 ? 0 : 1) : 0;
+    document.querySelectorAll(".label").forEach(el => {
+        el.style.transform = `translateX(-50%) scale(${labelScale})`;
+        el.style.opacity = labelOpacity;
+    });
+}
 
 /* ── POPUPS ── */
-function openPopup(e, marker, title){
+function openPopup(e, marker){
     e.stopPropagation();
 
-    // close existing
     if(activeMarker && activeMarker !== marker){
         activeMarker.querySelector(".mpopup").classList.remove("visible");
         activeMarker.classList.remove("popup-open");
@@ -448,7 +475,6 @@ function openPopup(e, marker, title){
 
     const popup = marker.querySelector(".mpopup");
 
-    // toggle off if already open
     if(popup.classList.contains("visible")){
         popup.classList.remove("visible");
         marker.classList.remove("popup-open");
@@ -457,23 +483,19 @@ function openPopup(e, marker, title){
         return;
     }
 
-    // position popup to the right of the marker dot
-    popup.style.left  = "10px";
-    popup.style.top   = "-5px";
+    popup.style.left = "10px";
+    popup.style.top  = "-5px";
     popup.classList.add("visible");
-    // raise this marker above all others so popup clears sibling markers/labels
     marker.classList.add("popup-open");
     activePopup = popup;
     activeMarker = marker;
 
-    // after it's visible, check if it overflows the map width and flip
     const markerLeft = parseInt(marker.style.left);
     if(markerLeft + 10 + 220 > 1158){
         popup.style.left = (-220 - 10) + "px";
     }
 }
 
-// click anywhere outside a marker closes all popups
 document.addEventListener("click", e => {
     if(activeMarker && !activeMarker.contains(e.target)){
         activeMarker.querySelector(".mpopup").classList.remove("visible");
@@ -483,23 +505,17 @@ document.addEventListener("click", e => {
     }
 });
 
-update();
-
 /* ── TOGGLES ── */
-let labelsOn  = true;
-let markersOn = true;
-
 function toggleLabels(){
     labelsOn = !labelsOn;
-    document.getElementById("mapContainer").classList.toggle("labels-hidden", !labelsOn);
     document.getElementById("btnLabels").classList.toggle("off", !labelsOn);
+    update();
 }
 
 function toggleMarkers(){
     markersOn = !markersOn;
     document.getElementById("mapContainer").classList.toggle("markers-hidden", !markersOn);
     document.getElementById("btnMarkers").classList.toggle("off", !markersOn);
-    // close any open popup when hiding markers
     if(!markersOn && activeMarker){
         activeMarker.querySelector(".mpopup").classList.remove("visible");
         activeMarker.classList.remove("popup-open");
@@ -507,6 +523,8 @@ function toggleMarkers(){
         activeMarker = null;
     }
 }
+
+update();
 
 </script>
 </body>
