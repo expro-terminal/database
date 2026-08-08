@@ -56,7 +56,6 @@ body{ overflow:hidden; background:black; color:#00ff88; }
     position:absolute;
     top:-22px;
     left:50%;
-    /* JS overrides transform with counter-scale */
     transform: translateX(-50%);
     transform-origin: center bottom;
     font-size:12px;
@@ -145,7 +144,6 @@ body{ overflow:hidden; background:black; color:#00ff88; }
     );
 }
 
-/* Toggle states */
 .labels-hidden .label { display:none !important; }
 .markers-hidden .marker { opacity:0; pointer-events:none; }
 .markers-hidden .marker.popup-open { opacity:1; pointer-events:auto; }
@@ -185,6 +183,7 @@ body{ overflow:hidden; background:black; color:#00ff88; }
     <div id="mapWorld">
 
         <img src="https://operator.coolsquad.xyz/u/luBi56.png" id="map">
+
 
         <!-- Interpolated route line (smooth catmull-rom spline) -->
         <svg id="routeLine" style="position:absolute;top:0;left:0;width:1158px;height:1320px;pointer-events:none;z-index:6;">
@@ -297,6 +296,16 @@ body{ overflow:hidden; background:black; color:#00ff88; }
             <div class="mpopup"><div class="mpopup-header"><h3>Orb, kills you if you get too close.</h3><div class="seer-id">SEER ID:<br>&lt;=&gt;</div></div><img src="https://operator.coolsquad.xyz/u/MnEDqi.png"></div>
         </div>
 
+        <div class="marker white" style="top:805px;left:840px;" onclick="openPopup(event,this)">
+            <div class="label">&lt;=&gt; • Orb</div>
+            <div class="mpopup"><div class="mpopup-header"><h3>Orb, kills you if you get too close.</h3><div class="seer-id">SEER ID:<br>&lt;=&gt;</div></div><img src="https://operator.coolsquad.xyz/u/nubH7Y.png"></div>
+        </div>
+
+        <div class="marker white" style="top:680px;left:660px;" onclick="openPopup(event,this)">
+            <div class="label">&lt;=&gt; • Orb</div>
+            <div class="mpopup"><div class="mpopup-header"><h3>Orb, kills you if you get too close.</h3><div class="seer-id">SEER ID:<br>&lt;=&gt;</div></div><img src="https://operator.coolsquad.xyz/u/7gToun.png"></div>
+        </div>
+
         <div class="marker blue" style="top:740px;left:895px;" onclick="openPopup(event,this)">
             <div class="label">Watchtower</div>
             <div class="mpopup"><h3>Watchtower</h3><img src="https://operator.coolsquad.xyz/u/L1mJ1N.png"></div>
@@ -369,7 +378,6 @@ let activeMarker = null;
 let labelsOn  = true;
 let markersOn = true;
 
-/* ── DRAG ── */
 container.addEventListener("mousedown", e => {
     dragging = true;
     sx = e.clientX - x;
@@ -421,7 +429,6 @@ window.addEventListener("mousemove", e => {
 container.addEventListener("mouseenter", () => tip.style.display = "block");
 container.addEventListener("mouseleave", () => tip.style.display = "none");
 
-/* ── ZOOM ── */
 window.addEventListener("wheel", e => {
     e.preventDefault();
     const delta  = e.deltaY < 0 ? 0.1 : -0.1;
@@ -451,11 +458,6 @@ function zoomOut(){
 
 function update(){
     world.style.transform = `translate(${x}px,${y}px) scale(${scale})`;
-
-    // Partial counter-scale: labels grow when zoomed in, shrink when zoomed out.
-    // Using 1/sqrt(scale) means they scale at half the rate of the map —
-    // bigger when zoomed in, smaller (less overlap) when zoomed out.
-    // Fades out below scale 0.35 to avoid clutter.
     const labelScale = 1 / Math.sqrt(scale);
     const labelOpacity = labelsOn ? (scale < 0.35 ? 0 : 1) : 0;
     document.querySelectorAll(".label").forEach(el => {
@@ -464,7 +466,6 @@ function update(){
     });
 }
 
-/* ── POPUPS ── */
 function openPopup(e, marker){
     e.stopPropagation();
 
@@ -505,7 +506,6 @@ document.addEventListener("click", e => {
     }
 });
 
-/* ── TOGGLES ── */
 function toggleLabels(){
     labelsOn = !labelsOn;
     document.getElementById("btnLabels").classList.toggle("off", !labelsOn);
