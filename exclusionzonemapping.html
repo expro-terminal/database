@@ -108,6 +108,39 @@ body{ overflow:hidden; background:black; color:#00ff88; }
     line-height:1.4;
     font-family:"Courier New",monospace;
 }
+
+/* Glitching SEER ID variant */
+.seer-id-glitch {
+    flex-shrink:0;
+    background: repeating-linear-gradient(
+        to bottom,
+        rgba(180,0,0,0.15) 0px,
+        rgba(180,0,0,0.15) 1px,
+        rgba(0,0,0,0.95) 1px,
+        rgba(0,0,0,0.95) 3px
+    );
+    border:1px solid #ff4444;
+    color:#ff6666;
+    font-size:9px;
+    padding:2px 5px;
+    white-space:nowrap;
+    line-height:1.4;
+    font-family:"Courier New",monospace;
+    position:relative;
+    min-width:38px;
+    text-align:center;
+}
+.seer-id-glitch .glitch-line {
+    display:block;
+    letter-spacing:1px;
+}
+.seer-id-glitch .glitch-val {
+    display:block;
+    letter-spacing:2px;
+    color:#ff3333;
+    text-shadow: 0 0 4px #ff0000;
+}
+
 .mpopup h3{ font-size:13px; margin-bottom:8px; }
 .mpopup img{ width:100%; border:1px solid #00ff88; margin-top:6px; }
 .mpopup a{ display:block; margin-top:8px; color:#6ed6ff; font-size:12px; }
@@ -184,7 +217,6 @@ body{ overflow:hidden; background:black; color:#00ff88; }
 
         <img src="https://operator.coolsquad.xyz/u/luBi56.png" id="map">
 
-
         <!-- Interpolated route line (smooth catmull-rom spline) -->
         <svg id="routeLine" style="position:absolute;top:0;left:0;width:1158px;height:1320px;pointer-events:none;z-index:6;">
             <path id="routePath"
@@ -237,8 +269,8 @@ body{ overflow:hidden; background:black; color:#00ff88; }
         </div>
 
         <div class="marker red" style="top:373px;left:550px;" onclick="openPopup(event,this)">
-            <div class="label">*** • Monolith</div>
-            <div class="mpopup"><div class="mpopup-header"><h3>The Monolith</h3><div class="seer-id">SEER ID:<br>***</div></div><img src="https://operator.coolsquad.xyz/u/mH30lg.png"></div>
+            <div class="label">Monolith</div>
+            <div class="mpopup"><div class="mpopup-header"><h3>The Monolith</h3><div class="seer-id-glitch"><span class="glitch-line">SEER ID:</span><span class="glitch-val" data-glitch="3">***</span></div></div><img src="https://operator.coolsquad.xyz/u/mH30lg.png"></div>
         </div>
 
         <div class="marker yellow" style="top:710px;left:690px;" onclick="openPopup(event,this)">
@@ -248,7 +280,7 @@ body{ overflow:hidden; background:black; color:#00ff88; }
 
         <div class="marker black" style="top:541px;left:750px;" onclick="openPopup(event,this)">
             <div class="label">Prism</div>
-            <div class="mpopup"><div class="mpopup-header"><h3>The Prism</h3><div class="seer-id">SEER ID:<br></div></div><img src="https://operator.coolsquad.xyz/u/XFIufE.png"></div>
+            <div class="mpopup"><div class="mpopup-header"><h3>The Prism</h3><div class="seer-id-glitch"><span class="glitch-line">SEER ID:</span><span class="glitch-val" data-glitch="3">***</span></div></div><img src="https://operator.coolsquad.xyz/u/XFIufE.png"></div>
         </div>
 
         <div class="marker brown" style="top:573px;left:856px;" onclick="openPopup(event,this)">
@@ -378,6 +410,42 @@ let activeMarker = null;
 let labelsOn  = true;
 let markersOn = true;
 
+/* ── GLITCH ENGINE ── */
+const GLITCH_CHARS = '!@#$%^&*<>?/\\|[]{}~`±§¶ΔΩΨΦΛαβγδ01';
+function randomGlitchStr(len) {
+    let s = '';
+    for (let i = 0; i < len; i++) s += GLITCH_CHARS[Math.floor(Math.random() * GLITCH_CHARS.length)];
+    return s;
+}
+function tickGlitch() {
+    document.querySelectorAll('.glitch-val').forEach(el => {
+        const len = parseInt(el.dataset.glitch) || 3;
+        // Randomly decide whether to show glitched or semi-stable version
+        if (Math.random() < 0.6) {
+            // Full glitch
+            el.textContent = randomGlitchStr(len);
+            el.style.color = Math.random() < 0.3 ? '#ff0000' : '#ff6666';
+            el.style.textShadow = Math.random() < 0.4
+                ? `${(Math.random()*4-2).toFixed(1)}px 0 #ff0000, 0 0 6px #ff3300`
+                : '0 0 4px #ff0000';
+        } else {
+            // Partially stable — 1-2 chars glitched
+            const chars = Array.from(randomGlitchStr(len));
+            const stable = Math.floor(Math.random() * len);
+            chars[stable] = '*';
+            el.textContent = chars.join('');
+            el.style.color = '#ff4444';
+            el.style.textShadow = '0 0 3px #ff2200';
+        }
+    });
+}
+// Run glitch at varying intervals for organic feel
+(function scheduleGlitch() {
+    tickGlitch();
+    setTimeout(scheduleGlitch, 60 + Math.random() * 120);
+})();
+
+/* ── DRAG ── */
 container.addEventListener("mousedown", e => {
     dragging = true;
     sx = e.clientX - x;
@@ -429,6 +497,7 @@ window.addEventListener("mousemove", e => {
 container.addEventListener("mouseenter", () => tip.style.display = "block");
 container.addEventListener("mouseleave", () => tip.style.display = "none");
 
+/* ── ZOOM ── */
 window.addEventListener("wheel", e => {
     e.preventDefault();
     const delta  = e.deltaY < 0 ? 0.1 : -0.1;
@@ -466,6 +535,7 @@ function update(){
     });
 }
 
+/* ── POPUPS ── */
 function openPopup(e, marker){
     e.stopPropagation();
 
@@ -506,6 +576,7 @@ document.addEventListener("click", e => {
     }
 });
 
+/* ── TOGGLES ── */
 function toggleLabels(){
     labelsOn = !labelsOn;
     document.getElementById("btnLabels").classList.toggle("off", !labelsOn);
