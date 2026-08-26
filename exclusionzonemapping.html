@@ -72,14 +72,17 @@ body{ overflow:hidden; background:black; color:#00ff88; }
     transition: opacity 0.15s;
 }
 
-.green  { background:#00ff88; box-shadow: 0 0 6px 2px rgba(0,255,136,0.7), 0 0 14px 4px rgba(0,255,136,0.3); }
-.red    { background:#ff3b3b; box-shadow: 0 0 6px 2px rgba(255,59,59,0.7),  0 0 14px 4px rgba(255,59,59,0.3); }
-.yellow { background:#ffd000; box-shadow: 0 0 6px 2px rgba(255,208,0,0.7),  0 0 14px 4px rgba(255,208,0,0.3); }
-.black  { background:#111; border:1px solid #00ff88; box-shadow: 0 0 6px 2px rgba(0,255,136,0.5), 0 0 14px 4px rgba(0,255,136,0.2); }
-.brown  { background:#8b5a2b; box-shadow: 0 0 6px 2px rgba(139,90,43,0.8),  0 0 14px 4px rgba(139,90,43,0.3); }
-.white  { background:#fff;    box-shadow: 0 0 6px 2px rgba(255,255,255,0.8), 0 0 14px 4px rgba(255,255,255,0.3); }
-.purple { background:#800080; box-shadow: 0 0 6px 2px rgba(160,0,160,0.8),  0 0 14px 4px rgba(160,0,160,0.3); }
-.blue   { background:#ADD8E6; box-shadow: 0 0 6px 2px rgba(173,216,230,0.8), 0 0 14px 4px rgba(173,216,230,0.8); }
+.green  { background:#39ff6a; box-shadow: 0 0 6px 2px rgba(57,255,106,0.7), 0 0 14px 4px rgba(57,255,106,0.3); }
+.red    { background:#ff1f4b; box-shadow: 0 0 6px 2px rgba(255,31,75,0.75), 0 0 14px 4px rgba(255,31,75,0.35); }
+.containment { background:#ff0000 !important; box-shadow: 0 0 8px 3px rgba(255,0,0,0.9), 0 0 18px 6px rgba(255,0,0,0.5); }
+.yellow { background:#ffb703; box-shadow: 0 0 6px 2px rgba(255,183,3,0.75), 0 0 14px 4px rgba(255,183,3,0.3); }
+.black  { background:#0a0a0a; border:1px solid #6ed6ff; box-shadow: 0 0 6px 2px rgba(110,214,255,0.5), 0 0 14px 4px rgba(110,214,255,0.25); }
+.prism-marker { border:1px solid #39ff6a !important; box-shadow: 0 0 6px 2px rgba(57,255,106,0.55), 0 0 14px 4px rgba(57,255,106,0.28) !important; }
+.unknown-marker { background:#000 !important; border:none !important; box-shadow:none !important; }
+.brown  { background:#c1611a; box-shadow: 0 0 6px 2px rgba(193,97,26,0.8), 0 0 14px 4px rgba(193,97,26,0.35); }
+.white  { background:#eafcff; box-shadow: 0 0 6px 2px rgba(234,252,255,0.85), 0 0 14px 4px rgba(234,252,255,0.35); }
+.purple { background:#b026ff; box-shadow: 0 0 6px 2px rgba(176,38,255,0.8), 0 0 14px 4px rgba(176,38,255,0.35); }
+.blue   { background:#00d9ff; box-shadow: 0 0 6px 2px rgba(0,217,255,0.8), 0 0 14px 4px rgba(0,217,255,0.4); }
 
 .mpopup{
     position:absolute;
@@ -143,6 +146,8 @@ body{ overflow:hidden; background:black; color:#00ff88; }
     color:#ff3333;
     text-shadow: 0 0 4px #ff0000;
 }
+
+.label.glitch-label{ color:#ff4444; text-shadow: 0 0 4px rgba(0,0,0,0.95), 0 0 8px rgba(0,0,0,0.95), 0 0 6px #ff2200; letter-spacing:1px; }
 
 .mpopup h3{ font-size:13px; margin-bottom:8px; }
 .mpopup img{ width:100%; border:1px solid #00ff88; margin-top:6px; }
@@ -261,12 +266,12 @@ body{ overflow:hidden; background:black; color:#00ff88; }
             <div class="mpopup"><h3>Placid Wakes FOB</h3></div>
         </div>
 
-        <div class="marker red" style="top:1195px;left:594px;" onclick="openPopup(event,this)">
+        <div class="marker red containment" style="top:1195px;left:594px;" onclick="openPopup(event,this)">
             <div class="label">&amp;&amp;&amp; • Containment #1</div>
             <div class="mpopup"><div class="mpopup-header"><h3>Emits deadly aberrant pressure in an extremely small radius</h3><div class="seer-id">SEER ID:<br>&amp;&amp;&amp;</div></div><img src="https://operator.coolsquad.xyz/u/RIghwK.png"></div>
         </div>
 
-        <div class="marker red" style="top:770px;left:930px;" onclick="openPopup(event,this)">
+        <div class="marker red containment" style="top:770px;left:930px;" onclick="openPopup(event,this)">
             <div class="label">&amp;&amp;&amp; • Containment #2</div>
             <div class="mpopup"><div class="mpopup-header"><h3>Floats around in the surrounding area</h3><div class="seer-id">SEER ID:<br>&amp;&amp;&amp;</div></div><img src="https://operator.coolsquad.xyz/u/6BOyNx.png"></div>
         </div>
@@ -281,7 +286,7 @@ body{ overflow:hidden; background:black; color:#00ff88; }
             <div class="mpopup"><div class="mpopup-header"><h3>Church, 100% AP suppression inside</h3><div class="seer-id">SEER ID:<br>+++</div></div><img src="https://operator.coolsquad.xyz/u/KGlT0e.png"></div>
         </div>
 
-        <div class="marker black" style="top:541px;left:750px;" onclick="openPopup(event,this)">
+        <div class="marker black prism-marker" style="top:541px;left:750px;" onclick="openPopup(event,this)">
             <div class="label">Prism</div>
             <div class="mpopup"><div class="mpopup-header"><h3>The Prism</h3><div class="seer-id-glitch"><span class="glitch-line">SEER ID:</span><span class="glitch-val" data-glitch="3">***</span></div></div><img src="https://operator.coolsquad.xyz/u/XFIufE.png"></div>
         </div>
@@ -376,6 +381,21 @@ body{ overflow:hidden; background:black; color:#00ff88; }
             <div class="mpopup"><h3>Shooting Range, just here i guess.</h3><img src="https://operator.coolsquad.xyz/u/lMZBf0.png"></div>
         </div>
 
+        <div class="marker blue" style="top:670px;left:530px;" onclick="openPopup(event,this)">
+            <div class="label">Radar Jammer #1</div>
+            <div class="mpopup"><h3>Big Ass Radar</h3></div>
+        </div>
+
+        <div class="marker blue" style="top:720px;left:880px;" onclick="openPopup(event,this)">
+            <div class="label">Radar Jammer #2</div>
+            <div class="mpopup"><h3>Big Ass Radar</h3></div>
+        </div>
+
+        <div class="marker black unknown-marker" style="top:550px;left:1070px;" onclick="openPopup(event,this)">
+            <div class="label glitch-label" data-glitch-len="14">sudo apt install opsec</div>
+            <div class="mpopup"><h3>sudo apt install opsec</h3><img src="https://operator.coolsquad.xyz/u/6MsPDF.png"></div>
+        </div>
+
         <div class="marker" style="
                 top:450px; left:835px;
                 width:150px; height:150px;
@@ -444,6 +464,27 @@ function tickGlitch() {
             el.textContent = chars.join('');
             el.style.color = '#ff4444';
             el.style.textShadow = '0 0 3px #ff2200';
+        }
+    });
+
+    document.querySelectorAll('.glitch-label').forEach(el => {
+        const len = parseInt(el.dataset.glitchLen) || (el.textContent.length || 6);
+        if (Math.random() < 0.55) {
+            // Full scramble
+            el.textContent = randomGlitchStr(len);
+            el.style.transform2 = null;
+            el.style.textShadow = Math.random() < 0.4
+                ? `${(Math.random()*3-1.5).toFixed(1)}px 0 #ff0000, 0 0 6px #ff3300, 0 0 4px rgba(0,0,0,0.95)`
+                : '0 0 5px #ff2200, 0 0 4px rgba(0,0,0,0.95)';
+        } else {
+            // Mostly scrambled with a couple stable chars
+            const chars = Array.from(randomGlitchStr(len));
+            const stableCount = Math.random() < 0.5 ? 1 : 2;
+            for (let i = 0; i < stableCount; i++) {
+                chars[Math.floor(Math.random() * len)] = '#';
+            }
+            el.textContent = chars.join('');
+            el.style.textShadow = '0 0 4px #ff2200, 0 0 4px rgba(0,0,0,0.95)';
         }
     });
 }
