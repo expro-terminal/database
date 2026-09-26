@@ -213,8 +213,9 @@ body{ overflow:hidden; background:black; color:#00ff88; }
 /* ══════════ MILITARY MAP TOOLS ══════════ */
 
 #toolbelt{
-    position:fixed; top:64px; left:14px; z-index:1000;
+    position:fixed; top:64px; left:0; z-index:1000;
     background:rgba(0,0,0,0.92); border:1px solid #00ff88;
+    border-left:none;
     padding:10px; width:190px;
     display:flex; flex-direction:column; gap:10px;
 }
@@ -255,9 +256,9 @@ body{ overflow:hidden; background:black; color:#00ff88; }
 .tb-file-group{ display:flex; flex-direction:column; gap:6px; }
 
 #toolbeltToggle{
-    position:fixed; top:64px; left:14px; z-index:1001;
+    position:fixed; top:64px; left:0; z-index:1001;
     width:30px; height:30px; background:black;
-    border:1px solid #00ff88; color:#00ff88; cursor:pointer; font-size:14px;
+    border:1px solid #00ff88; border-left:none; color:#00ff88; cursor:pointer; font-size:14px;
     display:none;
 }
 #toolbelt.collapsed{ display:none; }
@@ -276,6 +277,7 @@ body{ overflow:hidden; background:black; color:#00ff88; }
     padding:1px 5px;
     border-radius:2px;
     z-index:17;
+    text-shadow:none;
 }
 
 #legendPanel{
@@ -303,7 +305,7 @@ body{ overflow:hidden; background:black; color:#00ff88; }
 </div>
 
 <!-- ══ TOOLBELT ══ -->
-<div id="toolbelt">
+<div id="toolbelt" class="collapsed">
     <div class="tb-section-label">NAVIGATION</div>
     <div class="tb-row">
         <button class="tool-btn active" data-tool="pan" title="Pan / Select">✥</button>
@@ -576,6 +578,16 @@ const container = document.getElementById("mapContainer");
 const tip       = document.getElementById("cursorTip");
 
 container.addEventListener("contextmenu", e => e.preventDefault());
+
+/* keep the drawing toolbelt flush against the bottom of the topbar, whatever its rendered height is */
+function positionToolbelt(){
+    const topbarEl = document.querySelector('.topbar');
+    const h = topbarEl.offsetHeight + 'px';
+    document.getElementById('toolbelt').style.top = h;
+    document.getElementById('toolbeltToggle').style.top = h;
+}
+positionToolbelt();
+window.addEventListener('resize', positionToolbelt);
 
 let scale = 1, x = 0, y = 0;
 let dragging = false, sx, sy;
