@@ -30,6 +30,9 @@ body{ overflow:hidden; background:black; color:#00ff88; }
     position:relative; cursor:crosshair;
 }
 .map-container:active{ cursor:grabbing; }
+.map-container.tool-active{ cursor:crosshair; }
+.map-container.tool-active:active{ cursor:crosshair; }
+.map-container.tool-erase{ cursor: not-allowed; }
 
 #mapWorld{
     position:absolute; top:0; left:0;
@@ -73,7 +76,7 @@ body{ overflow:hidden; background:black; color:#00ff88; }
 }
 
 .green  { background:#39ff6a; box-shadow: 0 0 6px 2px rgba(57,255,106,0.7), 0 0 14px 4px rgba(57,255,106,0.3); }
-.red    { background:#ff1f4b; box-shadow: 0 0 6px 2px rgba(255,31,75,0.75), 0 0 14px 4px rgba(255,31,75,0.35); }
+.red    { background:#ff2020; box-shadow: 0 0 6px 2px rgba(255,32,32,0.75), 0 0 14px 4px rgba(255,32,32,0.35); }
 .containment { background:#ff0000 !important; box-shadow: 0 0 8px 3px rgba(255,0,0,0.9), 0 0 18px 6px rgba(255,0,0,0.5); }
 .yellow { background:#ffb703; box-shadow: 0 0 6px 2px rgba(255,183,3,0.75), 0 0 14px 4px rgba(255,183,3,0.3); }
 .black  { background:#0a0a0a; border:1px solid #6ed6ff; box-shadow: 0 0 6px 2px rgba(110,214,255,0.5), 0 0 14px 4px rgba(110,214,255,0.25); }
@@ -207,6 +210,85 @@ body{ overflow:hidden; background:black; color:#00ff88; }
     }
 }
 
+/* ══════════ MILITARY MAP TOOLS ══════════ */
+
+#toolbelt{
+    position:fixed; top:64px; left:14px; z-index:1000;
+    background:rgba(0,0,0,0.92); border:1px solid #00ff88;
+    padding:10px; width:190px;
+    display:flex; flex-direction:column; gap:10px;
+}
+.tb-section-label{
+    font-size:10px; color:#7dffb2; letter-spacing:1px;
+    border-bottom:1px solid rgba(0,255,136,0.3); padding-bottom:3px; margin-bottom:2px;
+}
+.tb-row{ display:grid; grid-template-columns:repeat(5, 1fr); gap:5px; justify-items:center; align-items:center; }
+.tool-btn{
+    width:30px; height:30px; background:black;
+    border:1px solid #00ff88; color:#00ff88;
+    font-size:15px; cursor:pointer; line-height:1;
+    display:flex; align-items:center; justify-content:center;
+}
+.tool-btn:hover{ background:rgba(0,255,136,0.15); }
+.tool-btn.active{ background:#00ff88; color:#000; }
+.tool-btn.erase-btn.active{ background:#ff2020; border-color:#ff2020; color:#000; }
+
+.swatch{
+    width:20px; height:20px; border:2px solid transparent;
+    cursor:pointer; box-sizing:border-box;
+}
+.swatch.active{ border-color:#fff; }
+
+.tb-select{
+    width:100%; background:black; color:#00ff88;
+    border:1px solid #00ff88; font-family:inherit; font-size:11px;
+    padding:3px;
+}
+.tb-btn-wide{
+    width:100%; background:black; color:#00ff88;
+    border:1px solid #00ff88; font-family:inherit; font-size:11px;
+    padding:6px; cursor:pointer;
+}
+.tb-btn-wide:hover{ background:rgba(0,255,136,0.15); }
+.tb-btn-wide.danger{ color:#ff6666; border-color:#ff4444; }
+.tb-btn-wide.danger:hover{ background:rgba(255,31,75,0.15); }
+.tb-file-group{ display:flex; flex-direction:column; gap:6px; }
+
+#toolbeltToggle{
+    position:fixed; top:64px; left:14px; z-index:1001;
+    width:30px; height:30px; background:black;
+    border:1px solid #00ff88; color:#00ff88; cursor:pointer; font-size:14px;
+    display:none;
+}
+#toolbelt.collapsed{ display:none; }
+#toolbelt.collapsed ~ #toolbeltToggle{ display:block; }
+
+.drawn-text{
+    position:absolute; color:#fff; font-size:13px; white-space:nowrap;
+    transform-origin:left center; cursor:pointer;
+    text-shadow:0 0 4px rgba(0,0,0,0.95),0 0 8px rgba(0,0,0,0.95);
+    pointer-events:auto; z-index:15;
+}
+.drawn-text.marker-label{
+    transform-origin:center bottom;
+    font-size:11px;
+    background:rgba(0,0,0,0.7);
+    padding:1px 5px;
+    border-radius:2px;
+    z-index:17;
+}
+
+#legendPanel{
+    position:fixed; bottom:20px; left:14px; z-index:1000;
+    background:rgba(0,0,0,0.92); border:1px solid #00ff88;
+    padding:10px; font-size:10px; color:#c8ffe0;
+    max-width:200px; display:none;
+}
+#legendPanel.visible{ display:block; }
+#legendPanel h4{ font-size:11px; color:#7dffb2; margin-bottom:6px; }
+#legendPanel div.legend-row{ display:flex; align-items:center; gap:6px; margin-bottom:3px; }
+#legendPanel span.legend-glyph{ width:16px; display:inline-block; text-align:center; }
+
 </style>
 </head>
 <body>
@@ -218,6 +300,63 @@ body{ overflow:hidden; background:black; color:#00ff88; }
     <div style="font-size:12px; color:#7dffb2; margin-top:4px;">
         KENAI SECTOR / RESTRICTED NDA-05+
     </div>
+</div>
+
+<!-- ══ TOOLBELT ══ -->
+<div id="toolbelt">
+    <div class="tb-section-label">NAVIGATION</div>
+    <div class="tb-row">
+        <button class="tool-btn active" data-tool="pan" title="Pan / Select">✥</button>
+        <button class="tool-btn erase-btn" data-tool="erase" title="Erase drawn object">✕</button>
+        <button class="tool-btn" id="collapseBtn" title="Collapse panel">«</button>
+    </div>
+
+    <div class="tb-section-label">DRAW</div>
+    <div class="tb-row">
+        <button class="tool-btn" data-tool="line" title="Line">╱</button>
+        <button class="tool-btn" data-tool="arrow" title="Movement / attack arrow">➤</button>
+        <button class="tool-btn" data-tool="freehand" title="Freehand">✎</button>
+        <button class="tool-btn" data-tool="polygon" title="Area / zone (dbl-click to close)">▱</button>
+        <button class="tool-btn" data-tool="text" title="Text label">T</button>
+        <button class="tool-btn" data-tool="marker" title="Place unit marker">⬥</button>
+        <button class="tool-btn" data-tool="measure" title="Measure distance">📏</button>
+    </div>
+
+    <div class="tb-section-label">COLOR</div>
+    <div class="tb-row">
+        <div class="swatch active" data-color="#eafcff" style="background:#eafcff;" title="White"></div>
+        <div class="swatch" data-color="#00d9ff" style="background:#00d9ff;" title="Blue"></div>
+        <div class="swatch" data-color="#ff2020" style="background:#ff2020;" title="Red"></div>
+        <div class="swatch" data-color="#39ff6a" style="background:#39ff6a;" title="Green"></div>
+        <div class="swatch" data-color="#ffb703" style="background:#ffb703;" title="Yellow"></div>
+        <div class="swatch" data-color="#8b2fff" style="background:#8b2fff;" title="Violet"></div>
+        <div class="swatch" data-color="#ff7a00" style="background:#ff7a00;" title="Orange"></div>
+        <div class="swatch" data-color="#e600ac" style="background:#e600ac;" title="Magenta"></div>
+        <div class="swatch" data-color="#8b5a2b" style="background:#8b5a2b;" title="Brown"></div>
+        <div class="swatch" data-color="#2b2b2b" style="background:#2b2b2b;border-color:#555;" title="Black"></div>
+    </div>
+
+    <div class="tb-section-label">FILE</div>
+    <div class="tb-file-group">
+        <button class="tb-btn-wide" id="legendBtn">Toggle Legend</button>
+        <button class="tb-btn-wide" id="exportBtn">Export Drawings</button>
+        <button class="tb-btn-wide" id="importBtn">Import Drawings</button>
+        <input type="file" id="importFile" accept="application/json" style="display:none;">
+        <button class="tb-btn-wide danger" id="clearBtn">Clear All Drawings</button>
+    </div>
+</div>
+<button id="toolbeltToggle" title="Expand tools">»</button>
+
+<div id="legendPanel">
+    <h4>SYMBOL LEGEND</h4>
+    <div class="legend-row"><span class="legend-glyph" style="color:#00d9ff;">▭</span> Friendly unit (blue rectangle)</div>
+    <div class="legend-row"><span class="legend-glyph" style="color:#ff2020;">◆</span> Hostile unit (red diamond)</div>
+    <div class="legend-row"><span class="legend-glyph" style="color:#39ff6a;">□</span> Neutral unit (green square)</div>
+    <div class="legend-row"><span class="legend-glyph" style="color:#ffb703;">⌘</span> Unknown unit (yellow quatrefoil)</div>
+    <div class="legend-row"><span class="legend-glyph">○</span> Marker in any other color = custom/other affiliation</div>
+    <div class="legend-row"><span class="legend-glyph">➤</span> Movement / attack vector</div>
+    <div class="legend-row"><span class="legend-glyph">▱</span> Area of operations / zone</div>
+    <div class="legend-row"><span class="legend-glyph">📏</span> Range ring / measured distance</div>
 </div>
 
 <div class="map-container" id="mapContainer">
@@ -260,6 +399,11 @@ body{ overflow:hidden; background:black; color:#00ff88; }
             document.getElementById("routePath").setAttribute("d", catmullToBezier(pts));
         })();
         </script>
+
+        <!-- ══ USER DRAWING LAYER ══ -->
+        <svg id="drawLayer" style="position:absolute;top:0;left:0;width:1158px;height:1320px;pointer-events:none;z-index:14;overflow:visible;"></svg>
+        <div id="textDrawLayer" style="position:absolute;top:0;left:0;width:1158px;height:1320px;pointer-events:none;z-index:15;"></div>
+        <svg id="unitDrawLayer" style="position:absolute;top:0;left:0;width:1158px;height:1320px;pointer-events:none;z-index:16;overflow:visible;"></svg>
 
         <div class="marker green" style="top:1218px;left:496px;" onclick="openPopup(event,this)">
             <div class="label">Placid Wakes FOB</div>
@@ -431,6 +575,8 @@ const world     = document.getElementById("mapWorld");
 const container = document.getElementById("mapContainer");
 const tip       = document.getElementById("cursorTip");
 
+container.addEventListener("contextmenu", e => e.preventDefault());
+
 let scale = 1, x = 0, y = 0;
 let dragging = false, sx, sy;
 let activePopup = null;
@@ -496,6 +642,15 @@ function tickGlitch() {
 
 /* ── DRAG ── */
 container.addEventListener("mousedown", e => {
+    if(e.button === 1){ // middle mouse always pans, even while a drawing tool is active
+        e.preventDefault();
+        dragging = true;
+        sx = e.clientX - x;
+        sy = e.clientY - y;
+        return;
+    }
+    if(e.button !== 0) return;
+    if(currentTool !== 'pan') return; // tool handlers below manage their own mousedown behavior
     dragging = true;
     sx = e.clientX - x;
     sy = e.clientY - y;
@@ -541,6 +696,8 @@ window.addEventListener("mousemove", e => {
     if(ty + tip.offsetHeight > window.innerHeight) ty = e.clientY - tip.offsetHeight - pad;
     tip.style.left = tx + "px";
     tip.style.top  = ty + "px";
+
+    handleToolMouseMove(mx, my);
 });
 
 container.addEventListener("mouseenter", () => tip.style.display = "block");
@@ -581,6 +738,12 @@ function update(){
     document.querySelectorAll(".label").forEach(el => {
         el.style.transform = `translateX(-50%) scale(${labelScale})`;
         el.style.opacity = labelOpacity;
+    });
+    document.querySelectorAll(".drawn-text").forEach(el => {
+        el.style.setProperty('--counter-scale', labelScale);
+        el.style.transform = el.classList.contains('marker-label')
+            ? `translateX(-50%) scale(${labelScale})`
+            : `scale(${labelScale})`;
     });
 }
 
@@ -644,6 +807,571 @@ function toggleMarkers(){
     }
 }
 
+/* ══════════════════ MILITARY MAP TOOLS ══════════════════ */
+
+const SVG_NS = "http://www.w3.org/2000/svg";
+const drawLayer     = document.getElementById("drawLayer");
+const textDrawLayer = document.getElementById("textDrawLayer");
+const unitDrawLayer = document.getElementById("unitDrawLayer");
+
+const GRID_X0 = 24, GRID_Y0 = 24;
+const CELL = (1158 - 24) / 21; // 54px == uniform grid cell in both axes
+
+/* JMS-style affiliation: derived from the color selected at placement time.
+   Friend = rectangle, Hostile = diamond, Neutral = square, Unknown = dashed quadrilateral.
+   Any other color places a generic dashed circle frame in that color ("other/custom"). */
+const JMS_AFFILIATION_COLORS = {
+    '#00d9ff': 'friendly',
+    '#ff2020': 'hostile',
+    '#39ff6a': 'neutral',
+    '#ffb703': 'unknown'
+};
+function classifyAffiliation(color){
+    return JMS_AFFILIATION_COLORS[color] || 'other';
+}
+
+let currentTool  = 'pan';
+let currentColor = '#eafcff';
+let drawings = [];      // persisted shapes: {id,type,color,points,text,unitType,label}
+let pending  = null;    // in-progress multi-click shape: {type, points:[[x,y]...]}
+let nextId = 1;
+
+let undoStack = [];
+function pushUndo(){
+    undoStack.push(JSON.parse(JSON.stringify(drawings)));
+    if(undoStack.length > 50) undoStack.shift();
+}
+function undo(){
+    if(undoStack.length === 0) return;
+    drawings = undoStack.pop();
+    cancelPending();
+    saveDrawings();
+    renderDrawings();
+}
+document.addEventListener('keydown', e => {
+    const tag = document.activeElement && document.activeElement.tagName;
+    if(tag === 'INPUT' || tag === 'TEXTAREA') return; // let native field undo work normally
+    if((e.ctrlKey || e.metaKey) && !e.shiftKey && e.key.toLowerCase() === 'z'){
+        e.preventDefault();
+        undo();
+    }
+});
+
+let rightMouseDown = false;
+let leftMouseDown = false;
+window.addEventListener('mousedown', e => {
+    if(e.button === 2) rightMouseDown = true;
+    if(e.button === 0) leftMouseDown = true;
+}, true);
+window.addEventListener('mouseup', e => {
+    if(e.button === 2) rightMouseDown = false;
+    if(e.button === 0) leftMouseDown = false;
+});
+window.addEventListener('blur', () => { rightMouseDown = false; leftMouseDown = false; });
+
+function loadDrawings(){
+    try{
+        const raw = localStorage.getItem('darkstate_ezm_drawings');
+        if(raw){
+            drawings = JSON.parse(raw);
+            nextId = drawings.reduce((m,d)=>Math.max(m,d.id||0),0) + 1;
+        }
+    }catch(err){ console.warn('Could not load saved drawings', err); }
+}
+function saveDrawings(){
+    try{ localStorage.setItem('darkstate_ezm_drawings', JSON.stringify(drawings)); }
+    catch(err){ console.warn('Could not save drawings', err); }
+}
+
+/* ── tool switching ── */
+document.querySelectorAll('.tool-btn[data-tool]').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+        cancelPending();
+        currentTool = btn.dataset.tool;
+        document.querySelectorAll('.tool-btn[data-tool]').forEach(b=>b.classList.remove('active'));
+        btn.classList.add('active');
+        container.classList.toggle('tool-active', currentTool !== 'pan');
+        container.classList.toggle('tool-erase', currentTool === 'erase');
+    });
+});
+
+document.querySelectorAll('.swatch').forEach(sw=>{
+    sw.addEventListener('click', ()=>{
+        document.querySelectorAll('.swatch').forEach(s=>s.classList.remove('active'));
+        sw.classList.add('active');
+        currentColor = sw.dataset.color;
+    });
+});
+
+document.getElementById('collapseBtn').addEventListener('click', ()=>{
+    document.getElementById('toolbelt').classList.add('collapsed');
+});
+document.getElementById('toolbeltToggle').addEventListener('click', ()=>{
+    document.getElementById('toolbelt').classList.remove('collapsed');
+});
+document.getElementById('legendBtn').addEventListener('click', ()=>{
+    document.getElementById('legendPanel').classList.toggle('visible');
+});
+let clearArmed = false;
+let clearArmTimer = null;
+const clearBtnEl = document.getElementById('clearBtn');
+const clearBtnLabel = clearBtnEl.textContent;
+clearBtnEl.addEventListener('click', ()=>{
+    if(!clearArmed){
+        clearArmed = true;
+        clearBtnEl.textContent = 'Click again to confirm';
+        clearArmTimer = setTimeout(()=>{
+            clearArmed = false;
+            clearBtnEl.textContent = clearBtnLabel;
+        }, 3000);
+        return;
+    }
+    clearTimeout(clearArmTimer);
+    clearArmed = false;
+    clearBtnEl.textContent = clearBtnLabel;
+    pushUndo();
+    drawings = [];
+    cancelPending();
+    saveDrawings();
+    renderDrawings();
+});
+document.getElementById('exportBtn').addEventListener('click', ()=>{
+    const blob = new Blob([JSON.stringify(drawings, null, 2)], {type:'application/json'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = 'exclusion-zone-overlay.json';
+    a.click();
+    URL.revokeObjectURL(url);
+});
+document.getElementById('importBtn').addEventListener('click', ()=>{
+    document.getElementById('importFile').click();
+});
+document.getElementById('importFile').addEventListener('change', e=>{
+    const file = e.target.files[0];
+    if(!file) return;
+    const reader = new FileReader();
+    reader.onload = evt => {
+        try{
+            const imported = JSON.parse(evt.target.result);
+            if(Array.isArray(imported)){
+                pushUndo();
+                drawings = drawings.concat(imported);
+                nextId = drawings.reduce((m,d)=>Math.max(m,d.id||0),0) + 1;
+                saveDrawings();
+                renderDrawings();
+            }
+        }catch(err){ alert('Could not read that file as a drawing export.'); }
+    };
+    reader.readAsText(file);
+    e.target.value = '';
+});
+
+function cancelPending(){
+    pending = null;
+    const rb = document.getElementById('rubberBand');
+    if(rb) rb.remove();
+    const dot = document.getElementById('polygonStartDot');
+    if(dot) dot.remove();
+}
+
+document.addEventListener('keydown', e => {
+    if(e.key === 'Escape') cancelPending();
+    if(e.key === 'Enter' && pending && pending.type === 'polygon' && pending.points.length >= 3){
+        finalizePolygon();
+    }
+});
+
+/* ── custom text prompt (native prompt()/confirm() are silently blocked in some preview contexts) ── */
+function showTextPrompt(labelText, onSubmit){
+    const overlay = document.createElement('div');
+    overlay.id = 'textPromptOverlay';
+    overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.65);z-index:9999;display:flex;align-items:center;justify-content:center;';
+    overlay.innerHTML =
+        '<div style="background:#000;border:1px solid #00ff88;padding:16px;width:260px;font-family:\'Courier New\',monospace;color:#00ff88;">' +
+            '<div style="font-size:11px;margin-bottom:8px;letter-spacing:1px;">' + labelText + '</div>' +
+            '<input id="textPromptInput" type="text" style="width:100%;background:#000;color:#00ff88;border:1px solid #00ff88;padding:6px;font-family:inherit;font-size:13px;" autocomplete="off">' +
+            '<div style="display:flex;gap:8px;margin-top:10px;">' +
+                '<button id="textPromptOk" style="flex:1;background:#00ff88;color:#000;border:none;padding:6px;cursor:pointer;font-family:inherit;">OK</button>' +
+                '<button id="textPromptCancel" style="flex:1;background:#000;color:#ff6666;border:1px solid #ff4444;padding:6px;cursor:pointer;font-family:inherit;">Cancel</button>' +
+            '</div>' +
+        '</div>';
+    document.body.appendChild(overlay);
+    const input = overlay.querySelector('#textPromptInput');
+    input.focus();
+
+    function cleanup(){
+        overlay.remove();
+        document.removeEventListener('keydown', keyHandler, true);
+    }
+    function submit(){ const v = input.value; cleanup(); onSubmit(v); }
+    function cancelIt(){ cleanup(); onSubmit(null); }
+    function keyHandler(e){
+        if(e.key === 'Enter'){ e.preventDefault(); e.stopPropagation(); submit(); }
+        if(e.key === 'Escape'){ e.preventDefault(); e.stopPropagation(); cancelIt(); }
+    }
+    document.addEventListener('keydown', keyHandler, true);
+    overlay.querySelector('#textPromptOk').addEventListener('click', submit);
+    overlay.querySelector('#textPromptCancel').addEventListener('click', cancelIt);
+}
+
+/* ── placing / clicking on the map (marker, text, polygon) ── */
+container.addEventListener('click', e => {
+    if(e.button !== 0) return;
+    if(currentTool === 'pan') return;
+    if(dragging) return;
+    if(['line','arrow','measure','freehand'].includes(currentTool)) return; // handled by press-and-hold below
+
+    const mx = (e.clientX - x) / scale;
+    const my = (e.clientY - y) / scale;
+
+    if(currentTool === 'marker'){
+        const unitType = classifyAffiliation(currentColor);
+        showTextPrompt('DESIGNATION FOR THIS UNIT (OPTIONAL)', label => {
+            addDrawing({ type:'marker', unitType, points:[[mx,my]], text: label || '', color: currentColor });
+        });
+        return;
+    }
+
+    if(currentTool === 'text'){
+        showTextPrompt('TEXT FOR THIS LABEL', txt => {
+            if(txt) addDrawing({ type:'text', points:[[mx,my]], text:txt, color: currentColor });
+        });
+        return;
+    }
+
+    if(currentTool === 'polygon'){
+        if(!pending) pending = { type:'polygon', points:[] };
+        if(pending.points.length >= 3){
+            const first = pending.points[0];
+            const screenDist = Math.hypot(mx - first[0], my - first[1]) * scale;
+            if(screenDist < 12){
+                finalizePolygon();
+                return;
+            }
+        }
+        pending.points.push([mx,my]);
+        renderPendingPreview();
+        return;
+    }
+});
+
+container.addEventListener('dblclick', e => {
+    if(currentTool === 'polygon' && pending && pending.points.length >= 3){
+        e.preventDefault();
+        finalizePolygon();
+    }
+});
+
+function finalizePolygon(){
+    addDrawing({ type:'polygon', points: pending.points.slice(), color: currentColor });
+    cancelPending();
+}
+
+/* ── press-and-hold drawing: line / arrow / measure / freehand form while the mouse is held, and commit on release ── */
+let shapeDrawing = false;
+container.addEventListener('mousedown', e => {
+    if(e.button !== 0) return; // left button only — right-click deletes, middle-click pans
+    if(!['line','arrow','measure','freehand'].includes(currentTool)) return;
+    shapeDrawing = true;
+    const mx = (e.clientX - x) / scale;
+    const my = (e.clientY - y) / scale;
+    pending = { type: currentTool, points:[[mx,my]] };
+});
+window.addEventListener('mouseup', e => {
+    if(shapeDrawing && pending){
+        const mx = (e.clientX - x) / scale;
+        const my = (e.clientY - y) / scale;
+        if(pending.type === 'freehand'){
+            pending.points.push([mx,my]);
+            if(pending.points.length > 1){
+                addDrawing({ type:'freehand', points: pending.points.slice(), color: currentColor });
+            }
+        } else {
+            const start = pending.points[0];
+            if(Math.hypot(mx - start[0], my - start[1]) > 3){
+                addDrawing({ type: pending.type, points:[start, [mx,my]], color: currentColor });
+            }
+        }
+        cancelPending();
+    }
+    shapeDrawing = false;
+});
+
+function handleToolMouseMove(mx, my){
+    if(shapeDrawing && pending){
+        if(pending.type === 'freehand'){
+            pending.points.push([mx,my]);
+            renderPendingPreview();
+        } else {
+            renderRubberBand(pending.points[0], [mx,my]);
+        }
+        return;
+    }
+    if(pending && pending.type === 'polygon' && pending.points.length){
+        renderPendingPreview([mx,my]);
+    }
+}
+
+function renderRubberBand(p1, p2){
+    let rb = document.getElementById('rubberBand');
+    if(!rb){
+        rb = document.createElementNS(SVG_NS, 'line');
+        rb.id = 'rubberBand';
+        rb.setAttribute('stroke', currentColor);
+        rb.setAttribute('stroke-width', '1.5');
+        rb.setAttribute('stroke-dasharray', '4,4');
+        rb.setAttribute('opacity', '0.7');
+        drawLayer.appendChild(rb);
+    }
+    rb.setAttribute('x1', p1[0]); rb.setAttribute('y1', p1[1]);
+    rb.setAttribute('x2', p2[0]); rb.setAttribute('y2', p2[1]);
+}
+
+function renderPendingPreview(livePoint){
+    let rb = document.getElementById('rubberBand');
+    if(!rb){
+        rb = document.createElementNS(SVG_NS, 'polyline');
+        rb.id = 'rubberBand';
+        rb.setAttribute('fill', pending.type==='polygon' ? 'rgba(255,255,255,0.08)' : 'none');
+        rb.setAttribute('stroke', currentColor);
+        rb.setAttribute('stroke-width', '1.5');
+        rb.setAttribute('stroke-dasharray', '4,4');
+        drawLayer.appendChild(rb);
+    }
+    const pts = pending.points.slice();
+    if(livePoint) pts.push(livePoint);
+    rb.setAttribute('points', pts.map(p=>p.join(',')).join(' '));
+
+    if(pending.type === 'polygon' && pending.points.length){
+        let dot = document.getElementById('polygonStartDot');
+        if(!dot){
+            dot = document.createElementNS(SVG_NS, 'circle');
+            dot.id = 'polygonStartDot';
+            dot.setAttribute('r', 6);
+            dot.setAttribute('fill', 'none');
+            dot.setAttribute('stroke-width', '2');
+            drawLayer.appendChild(dot);
+        }
+        const first = pending.points[0];
+        dot.setAttribute('cx', first[0]);
+        dot.setAttribute('cy', first[1]);
+        let snapped = false;
+        if(pending.points.length >= 3 && livePoint){
+            const screenDist = Math.hypot(livePoint[0]-first[0], livePoint[1]-first[1]) * scale;
+            snapped = screenDist < 12;
+        }
+        dot.setAttribute('stroke', snapped ? '#39ff6a' : currentColor);
+        dot.setAttribute('r', snapped ? 9 : 6);
+    }
+}
+
+/* ── erase ── */
+function eraseDrawing(id){
+    pushUndo();
+    drawings = drawings.filter(d => d.id !== id);
+    saveDrawings();
+    renderDrawings();
+}
+
+/* ── add + render ── */
+function addDrawing(d){
+    pushUndo();
+    d.id = nextId++;
+    drawings.push(d);
+    saveDrawings();
+    renderDrawings();
+}
+
+function distanceLabel(p1, p2){
+    const dx = p2[0]-p1[0], dy = p2[1]-p1[1];
+    const pxDist = Math.sqrt(dx*dx+dy*dy);
+    const cells = pxDist / CELL;
+    return cells.toFixed(1) + ' grid sq (' + Math.round(pxDist) + 'px)';
+}
+
+function makeArrowHead(p1, p2, color){
+    const size = 11;
+    const ang = Math.atan2(p2[1]-p1[1], p2[0]-p1[0]);
+    const a1 = ang + Math.PI - 0.4;
+    const a2 = ang + Math.PI + 0.4;
+    const x1 = p2[0] + size*Math.cos(a1), y1 = p2[1] + size*Math.sin(a1);
+    const x2 = p2[0] + size*Math.cos(a2), y2 = p2[1] + size*Math.sin(a2);
+    const tri = document.createElementNS(SVG_NS, 'polygon');
+    tri.setAttribute('points', `${p2[0]},${p2[1]} ${x1},${y1} ${x2},${y2}`);
+    tri.setAttribute('fill', color);
+    return tri;
+}
+
+/* JMS-style unit frame: transparent fill, colored outline only, keyed by affiliation.
+   friendly = rectangle, hostile = diamond, neutral = square, unknown = dashed quadrilateral,
+   other = dashed circle (custom / non-standard color chosen at placement). */
+function buildJmsFrame(unitType, color, cx, cy){
+    const g = document.createElementNS(SVG_NS, 'g');
+    g.setAttribute('transform', `translate(${cx},${cy})`);
+
+    function styleShape(shape){
+        shape.setAttribute('fill', 'none');
+        shape.setAttribute('stroke', color);
+        shape.setAttribute('stroke-width', '2');
+        shape.setAttribute('pointer-events', 'all'); // clickable even though unpainted interior
+        return shape;
+    }
+
+    if(unitType === 'friendly'){
+        const shape = document.createElementNS(SVG_NS, 'rect');
+        shape.setAttribute('x', -13); shape.setAttribute('y', -9);
+        shape.setAttribute('width', 26); shape.setAttribute('height', 18);
+        g.appendChild(styleShape(shape));
+    } else if(unitType === 'hostile'){
+        const shape = document.createElementNS(SVG_NS, 'polygon');
+        shape.setAttribute('points', '0,-14 14,0 0,14 -14,0');
+        g.appendChild(styleShape(shape));
+    } else if(unitType === 'neutral'){
+        const shape = document.createElementNS(SVG_NS, 'rect');
+        shape.setAttribute('x', -11); shape.setAttribute('y', -11);
+        shape.setAttribute('width', 22); shape.setAttribute('height', 22);
+        g.appendChild(styleShape(shape));
+    } else if(unitType === 'unknown'){
+        // real NATO JMS "unknown" frame: a quatrefoil (four overlapping lobes)
+        [[0,-7],[7,0],[0,7],[-7,0]].forEach(([cx2,cy2]) => {
+            const circ = document.createElementNS(SVG_NS, 'circle');
+            circ.setAttribute('cx', cx2); circ.setAttribute('cy', cy2);
+            circ.setAttribute('r', 8.5);
+            g.appendChild(styleShape(circ));
+        });
+    } else { // other / custom color
+        const shape = document.createElementNS(SVG_NS, 'circle');
+        shape.setAttribute('r', 13);
+        shape.setAttribute('stroke-dasharray', '3,3');
+        g.appendChild(styleShape(shape));
+    }
+
+    return g;
+}
+
+/* ── shape interactions: left-click erases (erase tool only), and holding the left button
+   while the Erase tool is active drag-erases across shapes; right-clicking any shape
+   deletes it instantly, and holding right-click while dragging does the same across shapes ── */
+function attachDrawingInteractions(el, id){
+    el.style.pointerEvents = 'auto';
+    el.style.cursor = 'pointer';
+
+    el.addEventListener('click', ev => {
+        if(currentTool === 'erase') eraseDrawing(id);
+        // no stopPropagation: lets marker/text/polygon placement land even when the
+        // click is on top of an existing drawing
+    });
+
+    el.addEventListener('contextmenu', ev => { ev.preventDefault(); });
+
+    el.addEventListener('mousedown', ev => {
+        if(ev.button === 2){ ev.preventDefault(); eraseDrawing(id); return; }
+        if(ev.button === 0 && currentTool === 'erase'){ eraseDrawing(id); return; }
+    });
+
+    el.addEventListener('mouseenter', () => {
+        if(rightMouseDown) eraseDrawing(id);
+        else if(currentTool === 'erase' && leftMouseDown) eraseDrawing(id);
+    });
+}
+
+function renderDrawings(){
+    // clear (but leave defs / rubber band logic out, it's transient anyway)
+    drawLayer.innerHTML = '';
+    textDrawLayer.innerHTML = '';
+    unitDrawLayer.innerHTML = '';
+
+    drawings.forEach(d => {
+        if(d.type === 'line' || d.type === 'arrow'){
+            const [p1,p2] = d.points;
+            const line = document.createElementNS(SVG_NS,'line');
+            line.setAttribute('x1',p1[0]); line.setAttribute('y1',p1[1]);
+            line.setAttribute('x2',p2[0]); line.setAttribute('y2',p2[1]);
+            line.setAttribute('stroke', d.color);
+            line.setAttribute('stroke-width', '2');
+            attachDrawingInteractions(line, d.id);
+            drawLayer.appendChild(line);
+            if(d.type === 'arrow') drawLayer.appendChild(makeArrowHead(p1,p2,d.color));
+        }
+        else if(d.type === 'measure'){
+            const [p1,p2] = d.points;
+            const line = document.createElementNS(SVG_NS,'line');
+            line.setAttribute('x1',p1[0]); line.setAttribute('y1',p1[1]);
+            line.setAttribute('x2',p2[0]); line.setAttribute('y2',p2[1]);
+            line.setAttribute('stroke', d.color);
+            line.setAttribute('stroke-width', '1.5');
+            line.setAttribute('stroke-dasharray', '6,4');
+            attachDrawingInteractions(line, d.id);
+            drawLayer.appendChild(line);
+
+            const mid = [(p1[0]+p2[0])/2, (p1[1]+p2[1])/2];
+            const div = document.createElement('div');
+            div.className = 'drawn-text';
+            div.style.left = mid[0] + 'px';
+            div.style.top  = (mid[1]-8) + 'px';
+            div.style.color = d.color;
+            div.style.fontSize = '11px';
+            div.textContent = distanceLabel(p1,p2);
+            attachDrawingInteractions(div, d.id);
+            textDrawLayer.appendChild(div);
+        }
+        else if(d.type === 'freehand'){
+            const poly = document.createElementNS(SVG_NS,'polyline');
+            poly.setAttribute('points', d.points.map(p=>p.join(',')).join(' '));
+            poly.setAttribute('fill','none');
+            poly.setAttribute('stroke', d.color);
+            poly.setAttribute('stroke-width','2');
+            poly.setAttribute('stroke-linejoin','round');
+            poly.setAttribute('stroke-linecap','round');
+            attachDrawingInteractions(poly, d.id);
+            drawLayer.appendChild(poly);
+        }
+        else if(d.type === 'polygon'){
+            const poly = document.createElementNS(SVG_NS,'polygon');
+            poly.setAttribute('points', d.points.map(p=>p.join(',')).join(' '));
+            poly.setAttribute('fill', d.color);
+            poly.setAttribute('fill-opacity','0.14');
+            poly.setAttribute('stroke', d.color);
+            poly.setAttribute('stroke-width','1.5');
+            poly.setAttribute('stroke-dasharray','6,4');
+            attachDrawingInteractions(poly, d.id);
+            drawLayer.appendChild(poly);
+        }
+        else if(d.type === 'text'){
+            const div = document.createElement('div');
+            div.className = 'drawn-text';
+            div.style.left = d.points[0][0] + 'px';
+            div.style.top  = d.points[0][1] + 'px';
+            div.style.color = d.color;
+            div.textContent = d.text;
+            attachDrawingInteractions(div, d.id);
+            textDrawLayer.appendChild(div);
+        }
+        else if(d.type === 'marker'){
+            const unitType = d.unitType || classifyAffiliation(d.color);
+            const [mx0, my0] = d.points[0];
+            const frame = buildJmsFrame(unitType, d.color, mx0, my0);
+            attachDrawingInteractions(frame, d.id);
+            unitDrawLayer.appendChild(frame);
+
+            if(d.text){
+                const lbl = document.createElement('div');
+                lbl.className = 'drawn-text marker-label';
+                lbl.style.left = mx0 + 'px';
+                lbl.style.top  = (my0 - 28) + 'px';
+                lbl.style.color = d.color;
+                lbl.textContent = d.text;
+                attachDrawingInteractions(lbl, d.id);
+                textDrawLayer.appendChild(lbl);
+            }
+        }
+    });
+
+    update();
+}
+
+loadDrawings();
+renderDrawings();
 update();
 
 </script>
