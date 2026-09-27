@@ -16,7 +16,11 @@
 <style>
 
 *{ margin:0; padding:0; box-sizing:border-box; font-family:"Courier New",monospace; }
-body{ overflow:hidden; background:black; color:#00ff88; }
+body{
+    overflow:hidden; background:black; color:#00ff88;
+    user-select:none; -webkit-user-select:none; -moz-user-select:none; -ms-user-select:none;
+}
+input, textarea{ user-select:text; -webkit-user-select:text; }
 
 .topbar{
     position:fixed; top:0; left:0; width:100%;
@@ -42,6 +46,7 @@ body{ overflow:hidden; background:black; color:#00ff88; }
 #map{
     display:block; width:1158px; height:1320px;
     user-select:none; pointer-events:none;
+    -webkit-user-drag:none; user-drag:none;
 }
 
 .marker{
@@ -424,7 +429,32 @@ body{ overflow:hidden; background:black; color:#00ff88; }
 
         <div class="marker red" style="top:373px;left:550px;" onclick="openPopup(event,this)">
             <div class="label">Monolith</div>
-            <div class="mpopup"><div class="mpopup-header"><h3>The Monolith</h3><div class="seer-id-glitch"><span class="glitch-line">SEER ID:</span><span class="glitch-val" data-glitch="3">***</span></div></div><img src="https://operator.coolsquad.xyz/u/mH30lg.png"></div>
+            <div class="mpopup"><div class="mpopup-header"><h3>The Monolith</h3><div class="seer-id">SEER ID:<br>&lt;3&gt;</div></div><img src="https://operator.coolsquad.xyz/u/IVSTKw.jpg"></div>
+        </div>
+
+        <div class="marker white" style="top:394px;left:577px;" onclick="openPopup(event,this)">
+            <div class="label">&lt;=&gt; • Orb</div>
+            <div class="mpopup"><div class="mpopup-header"><h3>Orb, kills you if you get too close.</h3><div class="seer-id">SEER ID:<br>&lt;=&gt;</div></div><img src="https://operator.coolsquad.xyz/u/0eg7oH.png"></div>
+        </div>
+
+        <div class="marker white" style="top:400px;left:545px;" onclick="openPopup(event,this)">
+            <div class="label">&lt;=&gt; • Orb</div>
+            <div class="mpopup"><div class="mpopup-header"><h3>Orb, kills you if you get too close.</h3><div class="seer-id">SEER ID:<br>&lt;=&gt;</div></div><img src="https://operator.coolsquad.xyz/u/gYZGDA.png"></div>
+        </div>
+
+        <div class="marker white" style="top:392px;left:519px;" onclick="openPopup(event,this)">
+            <div class="label">&lt;=&gt; • Orb</div>
+            <div class="mpopup"><div class="mpopup-header"><h3>Orb, kills you if you get too close.</h3><div class="seer-id">SEER ID:<br>&lt;=&gt;</div></div><img src="https://operator.coolsquad.xyz/u/MnEDqi.png"></div>
+        </div>
+
+        <div class="marker white" style="top:367px;left:526px;" onclick="openPopup(event,this)">
+            <div class="label">&lt;=&gt; • Orb</div>
+            <div class="mpopup"><div class="mpopup-header"><h3>Orb, kills you if you get too close.</h3><div class="seer-id">SEER ID:<br>&lt;=&gt;</div></div><img src="https://operator.coolsquad.xyz/u/nubH7Y.png"></div>
+        </div>
+
+        <div class="marker white" style="top:347px;left:532px;" onclick="openPopup(event,this)">
+            <div class="label">&lt;=&gt; • Orb</div>
+            <div class="mpopup"><div class="mpopup-header"><h3>Orb, kills you if you get too close.</h3><div class="seer-id">SEER ID:<br>&lt;=&gt;</div></div><img src="https://operator.coolsquad.xyz/u/7gToun.png"></div>
         </div>
 
         <div class="marker yellow" style="top:710px;left:690px;" onclick="openPopup(event,this)">
@@ -559,6 +589,68 @@ body{ overflow:hidden; background:black; color:#00ff88; }
             <div class="mpopup"><h3>Aurora Subsector</h3><img src="https://operator.coolsquad.xyz/u/8Dh6HN.png"></div>
         </div>
 
+        <div class="marker yellow" style="top:330px;left:630px;" onclick="openPopup(event,this)">
+            <div class="label">Cabin</div>
+            <div class="mpopup"><h3>Radio emitting AP inside.</h3><img src="https://operator.coolsquad.xyz/u/8EZJv5.png"></div>
+        </div>
+
+        <div class="marker" style="top:332px;left:647px;width:7px;height:7px;margin-left:-3.5px;margin-top:-3.5px;border-radius:50%;background:#0a0a0a;border:1.5px solid #fff;box-shadow:0 0 5px 1px rgba(255,255,255,0.5);" onclick="openPopup(event,this)">
+            <div class="label">{V}</div>
+            <div class="mpopup"><div class="mpopup-header"><h3>Floating bodies emitting 4k+ AP.</h3><div class="seer-id">SEER ID:<br>{V}</div></div><img src="https://operator.coolsquad.xyz/u/azAN0L.png"></div>
+        </div>
+
+        <div class="marker" style="top:344px;left:636px;width:7px;height:7px;margin-left:-3.5px;margin-top:-3.5px;border-radius:50%;background:#0a0a0a;border:1.5px solid #fff;box-shadow:0 0 5px 1px rgba(255,255,255,0.5);" onclick="openPopup(event,this)">
+            <div class="label">{V}</div>
+            <div class="mpopup"><div class="mpopup-header"><h3>Floating bodies emitting 4k+ AP.</h3><div class="seer-id">SEER ID:<br>{V}</div></div><img src="https://operator.coolsquad.xyz/u/azAN0L.png"></div>
+        </div>
+
+        <div class="marker" style="top:346px;left:622px;width:7px;height:7px;margin-left:-3.5px;margin-top:-3.5px;border-radius:50%;background:#0a0a0a;border:1.5px solid #fff;box-shadow:0 0 5px 1px rgba(255,255,255,0.5);" onclick="openPopup(event,this)">
+            <div class="label">{V}</div>
+            <div class="mpopup"><div class="mpopup-header"><h3>Floating bodies emitting 4k+ AP.</h3><div class="seer-id">SEER ID:<br>{V}</div></div><img src="https://operator.coolsquad.xyz/u/azAN0L.png"></div>
+        </div>
+
+        <div class="marker" style="top:331px;left:614px;width:7px;height:7px;margin-left:-3.5px;margin-top:-3.5px;border-radius:50%;background:#0a0a0a;border:1.5px solid #fff;box-shadow:0 0 5px 1px rgba(255,255,255,0.5);" onclick="openPopup(event,this)">
+            <div class="label">{V}</div>
+            <div class="mpopup"><div class="mpopup-header"><h3>Floating bodies emitting 4k+ AP.</h3><div class="seer-id">SEER ID:<br>{V}</div></div><img src="https://operator.coolsquad.xyz/u/azAN0L.png"></div>
+        </div>
+
+        <div class="marker" style="top:317px;left:620px;width:7px;height:7px;margin-left:-3.5px;margin-top:-3.5px;border-radius:50%;background:#0a0a0a;border:1.5px solid #fff;box-shadow:0 0 5px 1px rgba(255,255,255,0.5);" onclick="openPopup(event,this)">
+            <div class="label">{V}</div>
+            <div class="mpopup"><div class="mpopup-header"><h3>Floating bodies emitting 4k+ AP.</h3><div class="seer-id">SEER ID:<br>{V}</div></div><img src="https://operator.coolsquad.xyz/u/azAN0L.png"></div>
+        </div>
+
+        <div class="marker" style="top:313px;left:639px;width:7px;height:7px;margin-left:-3.5px;margin-top:-3.5px;border-radius:50%;background:#0a0a0a;border:1.5px solid #fff;box-shadow:0 0 5px 1px rgba(255,255,255,0.5);" onclick="openPopup(event,this)">
+            <div class="label">{V}</div>
+            <div class="mpopup"><div class="mpopup-header"><h3>Floating bodies emitting 4k+ AP.</h3><div class="seer-id">SEER ID:<br>{V}</div></div><img src="https://operator.coolsquad.xyz/u/azAN0L.png"></div>
+        </div>
+
+        <div class="marker" style="
+                top:890px; left:670px;
+                width:60px; height:60px;
+                border-radius:50%;
+                margin-left:-30px; margin-top:-30px;
+                background: rgba(234,252,255,0.05);
+                border: 1.5px solid rgba(234,252,255,0.4);
+            " onclick="openPopup(event,this)">
+            <div class="label" style="top:-30px;">Field of Crosses</div>
+            <div class="mpopup"><h3>Field of Crosses</h3><img src="https://operator.coolsquad.xyz/u/NEgEQL.png"></div>
+        </div>
+
+        <div class="marker black" style="top:890px;left:670px;" onclick="openPopup(event,this)">
+            <div class="label">+V+ • Hooded Figure</div>
+            <div class="mpopup"><div class="mpopup-header"><h3>Hooded Figure</h3><div class="seer-id">SEER ID:<br>+V+</div></div><img src="https://operator.coolsquad.xyz/u/NsAwVt.png"></div>
+        </div>
+
+        <div class="marker yellow" style="top:890px;left:682px;" onclick="openPopup(event,this)">
+            <div class="label">+ • Cross #4</div>
+            <div class="mpopup"><div class="mpopup-header"><h3>Patriarchal Cross, emits some AP</h3><div class="seer-id">SEER ID:<br>+</div></div></div>
+        </div>
+
+        <div class="marker black" style="top:716px;left:694px;" onclick="openPopup(event,this)">
+            <div class="label">+V+ • Hooded Figure</div>
+            <div class="mpopup"><div class="mpopup-header"><h3>Hooded Figure</h3><div class="seer-id">SEER ID:<br>+V+</div></div><img src="https://operator.coolsquad.xyz/u/1YoJod.png"></div>
+        </div>
+
     </div>
 </div>
 
@@ -578,6 +670,8 @@ const container = document.getElementById("mapContainer");
 const tip       = document.getElementById("cursorTip");
 
 container.addEventListener("contextmenu", e => e.preventDefault());
+container.addEventListener("dragstart", e => e.preventDefault());
+container.addEventListener("selectstart", e => e.preventDefault());
 
 /* keep the drawing toolbelt flush against the bottom of the topbar, whatever its rendered height is */
 function positionToolbelt(){
