@@ -32,6 +32,7 @@ input, textarea{ user-select:text; -webkit-user-select:text; }
 .map-container{
     width:100vw; height:100vh; overflow:hidden;
     position:relative; cursor:crosshair;
+    touch-action:none;
 }
 .map-container:active{ cursor:grabbing; }
 .map-container.tool-active{ cursor:crosshair; }
@@ -54,11 +55,15 @@ input, textarea{ user-select:text; -webkit-user-select:text; }
     border-radius:50%; margin-left:-5px; margin-top:-5px;
     cursor:pointer;
     z-index:10;
+    transition:opacity 0.2s;
 }
 
 .marker.popup-open {
     z-index:500;
 }
+
+/* hidden because it's been folded into a cluster badge */
+.marker.clustered{ opacity:0; pointer-events:none; }
 
 .label{
     position:absolute;
@@ -197,6 +202,29 @@ input, textarea{ user-select:text; -webkit-user-select:text; }
 .markers-hidden .marker { opacity:0; pointer-events:none; }
 .markers-hidden .marker.popup-open { opacity:1; pointer-events:auto; }
 .controls button.off { opacity:0.3; }
+
+/* ── marker clusters ── */
+.cluster{
+    position:absolute; min-width:26px; height:26px; padding:0 6px;
+    border-radius:13px; border:1.5px solid #00ff88;
+    background:rgba(0,0,0,0.88); color:#00ff88;
+    font-size:12px; font-weight:bold; line-height:23px; text-align:center;
+    white-space:nowrap; cursor:pointer; pointer-events:auto;
+    transform-origin:center center;
+    box-shadow:0 0 8px 2px rgba(0,255,136,0.35), inset 0 0 6px rgba(0,255,136,0.15);
+    animation:clusterIn 0.18s ease-out;
+}
+.cluster:hover{
+    background:rgba(0,255,136,0.2);
+    box-shadow:0 0 12px 3px rgba(0,255,136,0.6), inset 0 0 6px rgba(0,255,136,0.25);
+}
+@keyframes clusterIn{ from{ opacity:0; } to{ opacity:1; } }
+.markers-hidden .cluster{ opacity:0; pointer-events:none; }
+
+#zoomReadout{
+    text-align:center; font-size:11px; color:#7dffb2;
+    text-shadow:0 0 4px rgba(0,0,0,0.95); user-select:none;
+}
 
 @keyframes auroraPulse {
     0%, 100% {
@@ -416,6 +444,7 @@ input, textarea{ user-select:text; -webkit-user-select:text; }
         <svg id="drawLayer" style="position:absolute;top:0;left:0;width:1158px;height:1320px;pointer-events:none;z-index:14;overflow:visible;"></svg>
         <div id="textDrawLayer" style="position:absolute;top:0;left:0;width:1158px;height:1320px;pointer-events:none;z-index:15;"></div>
         <svg id="unitDrawLayer" style="position:absolute;top:0;left:0;width:1158px;height:1320px;pointer-events:none;z-index:16;overflow:visible;"></svg>
+        <div id="clusterLayer" style="position:absolute;top:0;left:0;width:1158px;height:1320px;pointer-events:none;z-index:12;"></div>
 
         <div class="marker green" style="top:1218px;left:496px;" onclick="openPopup(event,this)">
             <div class="label">Placid Wakes FOB</div>
@@ -672,8 +701,10 @@ input, textarea{ user-select:text; -webkit-user-select:text; }
 <div id="cursorTip"></div>
 
 <div class="controls">
+    <div id="zoomReadout">100%</div>
     <button onclick="zoomIn()">+</button>
     <button onclick="zoomOut()">−</button>
+    <button onclick="fitView()" title="Fit map to screen (0)" style="font-size:14px;">FIT</button>
     <button onclick="toggleLabels()" id="btnLabels" title="Toggle labels">𝐓</button>
     <button onclick="toggleMarkers()" id="btnMarkers" title="Toggle markers">◉</button>
 </div>
@@ -763,6 +794,7 @@ function tickGlitch() {
 
 /* ── DRAG ── */
 container.addEventListener("mousedown", e => {
+    interruptViewMotion();
     if(e.button === 1){ // middle mouse always pans, even while a drawing tool is active
         e.preventDefault();
         dragging = true;
@@ -778,7 +810,7 @@ container.addEventListener("mousedown", e => {
 });
 window.addEventListener("mouseup", () => dragging = false);
 window.addEventListener("mousemove", e => {
-    if(dragging){ x = e.clientX - sx; y = e.clientY - sy; update(); }
+    if(dragging){ x = e.clientX - sx; y = e.clientY - sy; applyTransform(); }
 
     const mx = (e.clientX - x) / scale;
     const my = (e.clientY - y) / scale;
@@ -824,48 +856,284 @@ window.addEventListener("mousemove", e => {
 container.addEventListener("mouseenter", () => tip.style.display = "block");
 container.addEventListener("mouseleave", () => tip.style.display = "none");
 
-/* ── ZOOM ── */
+/* ══════════════════ VIEW / ZOOM ══════════════════ */
+const MIN_SCALE = 0.2, MAX_SCALE = 6;
+function clampScale(s){ return Math.min(MAX_SCALE, Math.max(MIN_SCALE, s)); }
+
+function applyTransform(){
+    world.style.transform = `translate(${x}px,${y}px) scale(${scale})`;
+}
+
+/* visible map area = everything below the top bar */
+function viewport(){
+    const top = document.querySelector('.topbar').offsetHeight;
+    return { top, w: window.innerWidth, h: window.innerHeight - top };
+}
+
+let targetScale = 1;
+let zoomAnchor = { x: 0, y: 0 };
+let zoomRaf = 0, zoomLast = 0;
+let viewAnim = null;
+
+function stopSmoothZoom(){ if(zoomRaf){ cancelAnimationFrame(zoomRaf); zoomRaf = 0; } targetScale = scale; }
+function cancelViewAnim(){ if(viewAnim){ cancelAnimationFrame(viewAnim); viewAnim = null; } }
+function interruptViewMotion(){ cancelViewAnim(); stopSmoothZoom(); }
+
+/* zoom while keeping the screen point (cx,cy) fixed over the same map point */
+function zoomAbout(cx, cy, newScale){
+    newScale = clampScale(newScale);
+    x = cx - (cx - x) * (newScale / scale);
+    y = cy - (cy - y) * (newScale / scale);
+    scale = newScale;
+}
+
+/* exponential easing in log-space, so zooming feels the same speed at every zoom level */
+function zoomStep(now){
+    const dt = Math.min(64, now - zoomLast);
+    zoomLast = now;
+    const k = 1 - Math.exp(-dt / 70);
+    let next = scale * Math.pow(targetScale / scale, k);
+    if(Math.abs(Math.log(targetScale / next)) < 0.003) next = targetScale;
+    zoomAbout(zoomAnchor.x, zoomAnchor.y, next);
+    update();
+    zoomRaf = (scale !== targetScale) ? requestAnimationFrame(zoomStep) : 0;
+}
+
+function smoothZoomBy(factor, cx, cy){
+    cancelViewAnim();
+    if(!zoomRaf) targetScale = scale;
+    targetScale = clampScale(targetScale * factor);
+    zoomAnchor = { x: cx, y: cy };
+    if(!zoomRaf){ zoomLast = performance.now(); zoomRaf = requestAnimationFrame(zoomStep); }
+}
+
+/* animate so map point (wx,wy) ends up at screen point (sxp,syp) at scale toScale */
+function animateView(toScale, wx, wy, sxp, syp, dur){
+    interruptViewMotion();
+    dur = dur || 500;
+    toScale = clampScale(toScale);
+    const s0 = scale;
+    const p0x = x + wx * s0, p0y = y + wy * s0;
+    const t0 = performance.now();
+    function step(now){
+        const t = Math.min(1, (now - t0) / dur);
+        const e = 1 - Math.pow(1 - t, 3);
+        const s = s0 * Math.pow(toScale / s0, e);
+        scale = s;
+        x = (p0x + (sxp - p0x) * e) - wx * s;
+        y = (p0y + (syp - p0y) * e) - wy * s;
+        update();
+        if(t < 1){ viewAnim = requestAnimationFrame(step); }
+        else { viewAnim = null; targetScale = scale; }
+    }
+    viewAnim = requestAnimationFrame(step);
+}
+
+function zoomIn(){  const v = viewport(); smoothZoomBy(1.4,     v.w / 2, v.top + v.h / 2); }
+function zoomOut(){ const v = viewport(); smoothZoomBy(1 / 1.4, v.w / 2, v.top + v.h / 2); }
+function fitView(){
+    const v = viewport();
+    const s = clampScale(Math.min(v.w / 1158, v.h / 1320) * 0.96);
+    animateView(s, 1158 / 2, 1320 / 2, v.w / 2, v.top + v.h / 2);
+}
+
 window.addEventListener("wheel", e => {
     e.preventDefault();
-    const delta  = e.deltaY < 0 ? 0.1 : -0.1;
-    const newScale = Math.min(5, Math.max(0.2, +(scale + delta).toFixed(2)));
-    x = e.clientX - (e.clientX - x) * (newScale / scale);
-    y = e.clientY - (e.clientY - y) * (newScale / scale);
-    scale = newScale;
-    update();
+    let d = e.deltaY;
+    if(e.deltaMode === 1) d *= 33;          // lines  -> px
+    else if(e.deltaMode === 2) d *= 400;    // pages  -> px
+    d = Math.max(-240, Math.min(240, d));
+    const factor = Math.exp(-d * (e.ctrlKey ? 0.012 : 0.0015)); // ctrl = trackpad pinch
+    smoothZoomBy(factor, e.clientX, e.clientY);
 }, { passive:false });
 
-function zoomIn(){
-    const cx = window.innerWidth / 2, cy = window.innerHeight / 2;
-    const newScale = Math.min(5, +(scale + 0.1).toFixed(2));
-    x = cx - (cx - x) * (newScale / scale);
-    y = cy - (cy - y) * (newScale / scale);
-    scale = newScale;
-    update();
+document.addEventListener('keydown', e => {
+    const tag = document.activeElement && document.activeElement.tagName;
+    if(tag === 'INPUT' || tag === 'TEXTAREA' || e.ctrlKey || e.metaKey || e.altKey) return;
+    if(e.key === '+' || e.key === '=') zoomIn();
+    else if(e.key === '-' || e.key === '_') zoomOut();
+    else if(e.key === '0') fitView();
+});
+
+/* touch: two-finger pinch always zooms/pans, one finger pans while the Pan tool is active */
+let touchState = null;
+function touchDist(t){ return Math.hypot(t[0].clientX - t[1].clientX, t[0].clientY - t[1].clientY); }
+function touchMid(t){ return { x: (t[0].clientX + t[1].clientX) / 2, y: (t[0].clientY + t[1].clientY) / 2 }; }
+function startOnePointPan(t){
+    touchState = { mode:'pan', sx: t.clientX - x, sy: t.clientY - y, x0: t.clientX, y0: t.clientY, moved:false };
 }
-function zoomOut(){
-    const cx = window.innerWidth / 2, cy = window.innerHeight / 2;
-    const newScale = Math.max(0.2, +(scale - 0.1).toFixed(2));
-    x = cx - (cx - x) * (newScale / scale);
-    y = cy - (cy - y) * (newScale / scale);
-    scale = newScale;
-    update();
+container.addEventListener('touchstart', e => {
+    interruptViewMotion();
+    if(e.touches.length === 2){
+        const m = touchMid(e.touches);
+        touchState = { mode:'pinch', dist: touchDist(e.touches), mx: m.x, my: m.y };
+    } else if(e.touches.length === 1 && currentTool === 'pan'){
+        startOnePointPan(e.touches[0]);
+    } else {
+        touchState = null;
+    }
+}, { passive:true });
+container.addEventListener('touchmove', e => {
+    if(!touchState) return;
+    if(touchState.mode === 'pinch' && e.touches.length === 2){
+        e.preventDefault();
+        const d = touchDist(e.touches), m = touchMid(e.touches);
+        const ns = clampScale(scale * d / touchState.dist);
+        x = m.x - (touchState.mx - x) * (ns / scale);
+        y = m.y - (touchState.my - y) * (ns / scale);
+        scale = ns; targetScale = ns;
+        touchState.dist = d; touchState.mx = m.x; touchState.my = m.y;
+        update();
+    } else if(touchState.mode === 'pan' && e.touches.length === 1){
+        const t = e.touches[0];
+        if(!touchState.moved && Math.hypot(t.clientX - touchState.x0, t.clientY - touchState.y0) < 6) return;
+        touchState.moved = true;
+        e.preventDefault();
+        x = t.clientX - touchState.sx; y = t.clientY - touchState.sy;
+        applyTransform();
+    }
+}, { passive:false });
+container.addEventListener('touchend', e => {
+    if(e.touches.length === 1 && currentTool === 'pan') startOnePointPan(e.touches[0]);
+    else if(e.touches.length === 0) touchState = null;
+    else touchState = null;
+});
+container.addEventListener('touchcancel', () => { touchState = null; });
+
+/* ══════════════════ MARKER CLUSTERING ══════════════════ */
+/* Lore markers that sit closer than CLUSTER_RADIUS *screen* pixels are folded into one count badge.
+   Zooming in separates them again (and above CLUSTER_OFF_SCALE nothing is clustered at all).
+   Region markers (Aurora Subsector, Field of Crosses) and the hidden easter-egg marker are never clustered,
+   and a marker with its popup open is pinned visible. Markers made with the drawing tools are not clustered. */
+const CLUSTER_RADIUS    = 24;
+const CLUSTER_OFF_SCALE = 3.2;
+const clusterLayer = document.getElementById('clusterLayer');
+const loreMarkers = Array.from(document.querySelectorAll('#mapWorld > .marker')).map(el => {
+    const lbl = el.querySelector('.label');
+    let name = lbl ? lbl.textContent.trim() : '';
+    const dot = name.lastIndexOf(' \u2022 ');
+    if(dot !== -1) name = name.slice(dot + 3);
+    return {
+        el,
+        x: parseFloat(el.style.left),
+        y: parseFloat(el.style.top),
+        name: name || 'Marker',
+        region: parseFloat(el.style.width) >= 20 || el.classList.contains('unknown-marker')
+    };
+});
+let clusterKey = '';
+
+/* agglomerative: repeatedly merge the two closest groups until none are within the threshold */
+function computeClusters(threshWorld){
+    const groups = [];
+    loreMarkers.forEach((m, i) => {
+        if(!m.region && m.el !== activeMarker) groups.push({ ids:[i], x:m.x, y:m.y, n:1 });
+    });
+    while(groups.length > 1){
+        let best = threshWorld * threshWorld, bi = -1, bj = -1;
+        for(let i = 0; i < groups.length; i++){
+            for(let j = i + 1; j < groups.length; j++){
+                const dx = groups[i].x - groups[j].x, dy = groups[i].y - groups[j].y;
+                const d = dx * dx + dy * dy;
+                if(d < best){ best = d; bi = i; bj = j; }
+            }
+        }
+        if(bi < 0) break;
+        const a = groups[bi], b = groups[bj], n = a.n + b.n;
+        a.x = (a.x * a.n + b.x * b.n) / n;
+        a.y = (a.y * a.n + b.y * b.n) / n;
+        a.n = n;
+        a.ids = a.ids.concat(b.ids);
+        groups.splice(bj, 1);
+    }
+    return groups.filter(g => g.n > 1);
 }
 
+function buildClusterBadge(g){
+    const el = document.createElement('div');
+    el.className = 'cluster';
+    el.style.left = g.x + 'px';
+    el.style.top  = g.y + 'px';
+    el.textContent = g.n;
+    const counts = {};
+    g.ids.forEach(i => { const nm = loreMarkers[i].name; counts[nm] = (counts[nm] || 0) + 1; });
+    const parts = Object.keys(counts).map(n => counts[n] > 1 ? n + ' \u00d7' + counts[n] : n);
+    el.title = parts.slice(0, 8).join(', ') + (parts.length > 8 ? ', \u2026' : '');
+    el.addEventListener('click', ev => { ev.stopPropagation(); closeActivePopup(); zoomToCluster(g); });
+    return el;
+}
+
+function updateClusters(){
+    const groups = (scale >= CLUSTER_OFF_SCALE) ? [] : computeClusters(CLUSTER_RADIUS / scale);
+    const key = groups.map(g => g.ids.slice().sort((a, b) => a - b).join(',')).sort().join('|');
+    if(key !== clusterKey){
+        clusterKey = key;
+        loreMarkers.forEach(m => m.el.classList.remove('clustered'));
+        clusterLayer.innerHTML = '';
+        groups.forEach(g => {
+            g.ids.forEach(i => loreMarkers[i].el.classList.add('clustered'));
+            clusterLayer.appendChild(buildClusterBadge(g));
+        });
+    }
+    // badges keep a constant on-screen size however far you zoom
+    const inv = 1 / scale;
+    for(const el of clusterLayer.children){
+        el.style.transform = `translate(-50%,-50%) scale(${inv})`;
+    }
+}
+
+function closeActivePopup(){
+    if(!activeMarker) return;
+    activeMarker.querySelector('.mpopup').classList.remove('visible');
+    activeMarker.classList.remove('popup-open');
+    activePopup = null;
+    activeMarker = null;
+}
+
+/* click a badge: zoom just far enough that its members separate (or the group fills ~60% of the view) */
+function zoomToCluster(g){
+    const pts = g.ids.map(i => loreMarkers[i]);
+    let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity, dmin = Infinity;
+    pts.forEach((p, i) => {
+        minX = Math.min(minX, p.x); maxX = Math.max(maxX, p.x);
+        minY = Math.min(minY, p.y); maxY = Math.max(maxY, p.y);
+        for(let j = i + 1; j < pts.length; j++){
+            const d = Math.hypot(p.x - pts[j].x, p.y - pts[j].y);
+            if(d > 0.5) dmin = Math.min(dmin, d);
+        }
+    });
+    const v = viewport();
+    const fit = Math.min((v.w * 0.6) / Math.max(maxX - minX, 40), (v.h * 0.6) / Math.max(maxY - minY, 40));
+    const sep = (CLUSTER_RADIUS * 1.25) / Math.max(dmin, 1);
+    const target = clampScale(Math.max(scale * 1.5, Math.min(fit, sep)));
+    animateView(target, (minX + maxX) / 2, (minY + maxY) / 2, v.w / 2, v.top + v.h / 2);
+}
+
+/* ══════════════════ SCALE-DEPENDENT UPDATE ══════════════════ */
+const loreLabels  = Array.from(document.querySelectorAll('.label'));
+const zoomReadout = document.getElementById('zoomReadout');
+let lastLabelKey = '';
+
 function update(){
-    world.style.transform = `translate(${x}px,${y}px) scale(${scale})`;
+    applyTransform();
+
     const labelScale = 1 / Math.sqrt(scale);
     const labelOpacity = labelsOn ? (scale < 0.35 ? 0 : 1) : 0;
-    document.querySelectorAll(".label").forEach(el => {
-        el.style.transform = `translateX(-50%) scale(${labelScale})`;
-        el.style.opacity = labelOpacity;
-    });
+    const key = labelScale.toFixed(4) + '|' + labelOpacity;
+    if(key !== lastLabelKey){
+        lastLabelKey = key;
+        const tf = `translateX(-50%) scale(${labelScale})`;
+        loreLabels.forEach(el => { el.style.transform = tf; el.style.opacity = labelOpacity; });
+    }
     document.querySelectorAll(".drawn-text").forEach(el => {
         el.style.setProperty('--counter-scale', labelScale);
         el.style.transform = el.classList.contains('marker-label')
             ? `translateX(-50%) scale(${labelScale})`
             : `scale(${labelScale})`;
     });
+
+    updateClusters();
+    zoomReadout.textContent = Math.round(scale * 100) + '%';
 }
 
 /* ── POPUPS ── */
@@ -884,6 +1152,7 @@ function openPopup(e, marker){
         marker.classList.remove("popup-open");
         activePopup = null;
         activeMarker = null;
+        updateClusters();
         return;
     }
 
@@ -898,6 +1167,7 @@ function openPopup(e, marker){
     if(markerLeft + 10 + 220 > 1158){
         popup.style.left = (-220 - 10) + "px";
     }
+    updateClusters();
 }
 
 document.addEventListener("click", e => {
@@ -906,6 +1176,7 @@ document.addEventListener("click", e => {
         activeMarker.classList.remove("popup-open");
         activePopup = null;
         activeMarker = null;
+        updateClusters();
     }
 });
 
@@ -925,6 +1196,7 @@ function toggleMarkers(){
         activeMarker.classList.remove("popup-open");
         activePopup = null;
         activeMarker = null;
+        updateClusters();
     }
 }
 
